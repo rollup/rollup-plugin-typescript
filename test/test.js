@@ -10,7 +10,7 @@ describe( 'rollup-plugin-typescript', function () {
 	it( 'runs code through typescript', function () {
 		var start = Date.now();
 		return rollup.rollup({
-			entry: 'samples/basic/main.ts',
+			entry: 'sample/basic/main.ts',
 			plugins: [ plugin() ]
 		}).then( function ( bundle ) {
 			console.log( 'bundled in %s ms', Date.now() - start );
