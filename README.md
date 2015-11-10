@@ -26,7 +26,11 @@ rollup({
   ]
 }).then(...)
 ```
-All options are as per the [Typescript documentation](https://typescriptlang.org/), except `options.include` and `options.exclude` (each a minimatch pattern, or array of minimatch patterns), which determine which files are transpiled by Typescript (by default, all files are transpiled).
+All options are as per the [Typescript's Compiler Options](https://github.com/Microsoft/TypeScript/wiki/Compiler-Options), except `options.include` and `options.exclude` (each a minimatch pattern, or array of minimatch patterns), which determine which files are transpiled by Typescript (by default, all files are transpiled).
+
+## Issues
+
+TypeScript doesn't seem to be able to transpile to ECMAScript 5 while preserving modules. This means that only TypeScript specific syntax is stripped from the code during transpilation. (If a way exists, please let me know.)
 
 ## License
 

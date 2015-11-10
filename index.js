@@ -8,6 +8,7 @@ var assign = Object.assign || function ( target, source ) {
 
 	return target;
 };
+
 module.exports = function ( options ) {
 	options = assign( {}, options || {} );
 
@@ -19,7 +20,9 @@ module.exports = function ( options ) {
 		transform: function ( code, id ) {
 			if ( !filter( id ) ) return null;
 
-			var transformed = typescript.transpileModule( code, { compilerOptions: assign( { module: typescript.ModuleKind.ES6 }, options ) } );
+			var transformed = typescript.transpileModule( code, {
+				compilerOptions: assign( { target: typescript.ScriptTarget.ES6 }, options )
+			});
 
 
 			return {
