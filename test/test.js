@@ -21,7 +21,7 @@ describe( 'rollup-plugin-typescript', function () {
 
 			const code = generated.code;
 
-			assert.ok( code.indexOf( 'const' ) === -1, code );
+			assert.ok( code.indexOf( 'number' ) === -1, code );
 		});
 	});
 });
