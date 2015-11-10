@@ -30,7 +30,9 @@ All options are as per the [Typescript's Compiler Options](https://github.com/Mi
 
 ## Issues
 
-TypeScript doesn't seem to be able to transpile to ECMAScript 5 while preserving modules. This means that only TypeScript specific syntax is stripped from the code during transpilation. (If a way exists, please let me know.)
+TypeScript (as of 1.6.2) isn't able to transpile to ES5 while preserving ES2015 modules. This means that only TypeScript specific extensions are stripped from the code during transpilation. A second pass will be needed to target ES5.
+
+This issue seems to be addressed by (the currently unreleased) [TypeScript 1.7.0](https://github.com/Microsoft/TypeScript/wiki/Roadmap#17) :tada:.
 
 ## License
 
