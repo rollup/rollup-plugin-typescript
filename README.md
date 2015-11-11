@@ -15,7 +15,6 @@ npm install --save-dev rollup-plugin-typescript
 ## Usage
 
 ```js
-import { rollup } from 'rollup';
 import typescript from 'rollup-plugin-typescript';
 
 export default {
@@ -36,17 +35,19 @@ All options are as per the [Typescript's Compiler Options](https://github.com/Mi
 TypeScript 1.6.2 isn't able to transpile to ES5 while preserving ES2015 modules. That's why we use a prerelease of [TypeScript 1.7.0](https://github.com/Microsoft/TypeScript/wiki/Roadmap#17) for ease of use. :rocket: This option can be easily be overridden.
 
 ```js
+import typescript from 'rollup-plugin-typescript';
 import * as ts from 'typescript';
 
-rollup({
+export default {
   entry: 'main.ts',
+
   plugins: [
     typescript({
       target: ts.ScriptTarget.ES6
       sourceMap: true
     })
   ]
-}).then(...)
+}
 ```
 
 ## License
