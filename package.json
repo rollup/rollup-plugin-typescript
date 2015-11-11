@@ -1,10 +1,10 @@
 {
   "name": "rollup-plugin-typescript",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "devDependencies": {
     "eslint": "^1.7.2",
     "mocha": "^2.3.3",
-    "rollup": "^0.20.0"
+    "rollup": "^0.20.5"
   },
   "scripts": {
     "test": "mocha",

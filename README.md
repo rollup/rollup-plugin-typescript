@@ -18,22 +18,36 @@ npm install --save-dev rollup-plugin-typescript
 import { rollup } from 'rollup';
 import typescript from 'rollup-plugin-typescript';
 
-rollup({
+export default {
   entry: 'main.ts',
+
   plugins: [
     typescript({
       sourceMap: true
     })
   ]
-}).then(...)
+}
 ```
+
 All options are as per the [Typescript's Compiler Options](https://github.com/Microsoft/TypeScript/wiki/Compiler-Options), except `options.include` and `options.exclude` (each a minimatch pattern, or array of minimatch patterns), which determine which files are transpiled by Typescript (by default, all files are transpiled).
 
 ## Issues
 
-TypeScript (as of 1.6.2) isn't able to transpile to ES5 while preserving ES2015 modules. This means that only TypeScript specific extensions are stripped from the code during transpilation. A second pass will be needed to target ES5.
+TypeScript 1.6.2 isn't able to transpile to ES5 while preserving ES2015 modules. That's why we use a prerelease of [TypeScript 1.7.0](https://github.com/Microsoft/TypeScript/wiki/Roadmap#17) for ease of use. :rocket: This option can be easily be overridden.
 
-This issue seems to be addressed by (the currently unreleased) [TypeScript 1.7.0](https://github.com/Microsoft/TypeScript/wiki/Roadmap#17) :tada:.
+```js
+import * as ts from 'typescript';
+
+rollup({
+  entry: 'main.ts',
+  plugins: [
+    typescript({
+      target: ts.ScriptTarget.ES6
+      sourceMap: true
+    })
+  ]
+}).then(...)
+```
 
 ## License
 
