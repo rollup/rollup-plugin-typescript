@@ -1,5 +1,5 @@
 # rollup-plugin-typescript
-![travis-ci](https://travis-ci.org/Victorystick/rollup-plugin-typescript.svg?branch=master)
+![travis-ci](https://travis-ci.org/rollup/rollup-plugin-typescript.svg?branch=master)
 
 Seamless integration between Rollup and Typescript.
 
