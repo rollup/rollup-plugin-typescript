@@ -21,7 +21,10 @@ module.exports = function ( options ) {
 			if ( !filter( id ) ) return null;
 
 			var transformed = typescript.transpileModule( code, {
-				compilerOptions: assign( { target: typescript.ScriptTarget.ES6 }, options )
+				compilerOptions: assign( {
+					target: typescript.ScriptTarget.ES5,
+					module: typescript.ModuleKind.ES6
+				}, options )
 			});
 
 

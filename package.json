@@ -11,7 +11,7 @@
     "prepublish": "npm run test"
   },
   "dependencies": {
-    "typescript": "^1.6.2",
+    "typescript": "1.7.0-dev.20151016",
     "rollup-pluginutils": "^1.1.0"
   }
 }
