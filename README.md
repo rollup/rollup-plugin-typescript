@@ -15,6 +15,7 @@ npm install --save-dev rollup-plugin-typescript
 ## Usage
 
 ```js
+// rollup.config.js
 import typescript from 'rollup-plugin-typescript';
 
 export default {
