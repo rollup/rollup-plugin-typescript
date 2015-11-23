@@ -23,14 +23,16 @@ module.exports = function ( options ) {
 			var transformed = typescript.transpileModule( code, {
 				compilerOptions: assign( {
 					target: typescript.ScriptTarget.ES5,
-					module: typescript.ModuleKind.ES6
+					module: typescript.ModuleKind.ES6,
+					sourceMap: true
 				}, options )
 			});
 
 
 			return {
 				code: transformed.outputText,
-				map: transformed.sourceMapText
+				// Rollup expects `map` to be an object so we must parse the string
+				map: JSON.parse(transformed.sourceMapText)
 			};
 		}
 	};
