@@ -22,9 +22,7 @@ export default {
   entry: 'main.ts',
 
   plugins: [
-    typescript({
-      sourceMap: true
-    })
+    typescript()
   ]
 }
 ```
@@ -46,7 +44,6 @@ export default {
   plugins: [
     typescript({
       target: ts.ScriptTarget.ES6
-      sourceMap: true
     })
   ]
 }
