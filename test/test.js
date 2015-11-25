@@ -51,4 +51,27 @@ describe( 'rollup-plugin-typescript', function () {
 			assert.ok( code.indexOf( '=>' ) === -1, code );
 		});
 	});
+
+	it( 'should use named exports for classes', function () {
+		var start = Date.now();
+
+		return rollup.rollup({
+			entry: 'sample/export-class/main.ts',
+			plugins: [
+				typescript()
+			]
+		}).then( function ( bundle ) {
+			console.log( 'bundled in %s ms', Date.now() - start );
+
+			start = Date.now();
+			const generated = bundle.generate();
+			console.log( 'generated in %s ms', Date.now() - start );
+
+			const code = generated.code;
+
+			console.log(code);
+
+			assert.ok( code.indexOf( 'Foo' ) !== -1, code );
+		});
+	});
 });
