@@ -31,7 +31,7 @@ All options are as per the [Typescript's Compiler Options](https://github.com/Mi
 
 ## Issues
 
-TypeScript 1.6.2 isn't able to transpile to ES5 while preserving ES2015 modules. That's why we use a prerelease of [TypeScript 1.7.0](https://github.com/Microsoft/TypeScript/wiki/Roadmap#17) for ease of use. :rocket: This option can be easily be overridden.
+TypeScript 1.6.2 isn't able to transpile to ES5 while preserving ES2015 modules. That's why we use  [TypeScript 1.7.0](https://github.com/Microsoft/TypeScript/wiki/Roadmap#17) or greater for ease of use. :rocket: This option can be easily be overridden.
 
 ```js
 // rollup.config.js
