@@ -34,7 +34,7 @@ module.exports = function ( options ) {
 
 			var transformed = typescript.transpileModule( code, {
 				compilerOptions: assign( {
-					target: typescript.ScriptTarget.ES5,
+					target: typescript.ScriptTarget.ES6,
 					module: typescript.ModuleKind.ES6,
 					sourceMap: true
 				}, options )
