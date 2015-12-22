@@ -23,6 +23,9 @@
     "typescript": "1.7.5",
     "rollup-pluginutils": "^1.1.0"
   },
+  "files": [
+    "index.js"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/rollup/rollup-plugin-typescript.git"
