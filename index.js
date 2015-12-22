@@ -1,5 +1,6 @@
 var typescript = require( 'typescript' );
 var createFilter = require( 'rollup-pluginutils' ).createFilter;
+var fs = require('fs');
 
 var assign = Object.assign || function ( target, source ) {
 	Object.keys( source ).forEach( function ( key ) {
@@ -8,6 +9,17 @@ var assign = Object.assign || function ( target, source ) {
 
 	return target;
 };
+
+var	moduleResolutionHost = {
+		fileExists : function(filePath) {
+		try {
+				return fs.statSync(filePath).isFile();
+		}
+		catch (err) {
+				return false;
+		}
+	}
+}
 
 module.exports = function ( options ) {
 	options = assign( {}, options || {} );
@@ -34,6 +46,16 @@ module.exports = function ( options ) {
 				// Rollup expects `map` to be an object so we must parse the string
 				map: JSON.parse(transformed.sourceMapText)
 			};
+		},
+		resolveId: function(importee, importer) {
+			if(!importer) return null;
+			result = typescript.nodeModuleNameResolver(importee, importer, moduleResolutionHost);
+
+			if(result.resolvedModule && result.resolvedModule.resolvedFileName && result.resolvedModule.isExternalLibraryImport != true ) {
+				return result.resolvedModule.resolvedFileName;
+			} else {
+				return null;
+			}
 		}
 	};
 };
