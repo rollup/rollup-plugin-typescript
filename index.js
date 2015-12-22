@@ -51,8 +51,9 @@ module.exports = function ( options ) {
 			if(!importer) return null;
 			result = typescript.nodeModuleNameResolver(importee, importer, moduleResolutionHost);
 
-			if(result.resolvedModule && result.resolvedModule.resolvedFileName && result.resolvedModule.isExternalLibraryImport != true ) {
-				return result.resolvedModule.resolvedFileName;
+			if(result.resolvedModule && result.resolvedModule.resolvedFileName) {
+				fileName = result.resolvedModule.resolvedFileName.replace(/\.d\.ts$/, ".js");
+				return fileName;
 			} else {
 				return null;
 			}
