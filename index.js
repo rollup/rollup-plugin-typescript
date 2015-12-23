@@ -10,7 +10,7 @@ var assign = Object.assign || function ( target, source ) {
 	return target;
 };
 
-var	moduleResolutionHost = {
+var	resolveHost = {
 		fileExists : function(filePath) {
 		try {
 				return fs.statSync(filePath).isFile();
@@ -49,14 +49,31 @@ module.exports = function ( options ) {
 		},
 		resolveId: function(importee, importer) {
 			if(!importer) return null;
-			result = typescript.nodeModuleNameResolver(importee, importer, moduleResolutionHost);
 
-			if(result.resolvedModule && result.resolvedModule.resolvedFileName) {
-				fileName = result.resolvedModule.resolvedFileName.replace(/\.d\.ts$/, ".js");
-				return fileName;
-			} else {
-				return null;
+			//Use the typescript nodeModuleNameResolver for finding external Modules
+			result = typescript.nodeModuleNameResolver(importee, importer, resolveHost);
+
+			if(result.resolvedModule && result.resolvedModule.resolvedFileName ) {
+				fileName = result.resolvedModule.resolvedFileName;
+
+				//If it's a typing, we probably want to look for the real js file
+				if(fileName.endsWith(".d.ts")) {
+
+					//Super simple search for file
+					candidateFile = fileName.replace(/\.d\.ts$/, ".js");
+
+					//We check the file exists, and if it does, we assume the right one.
+					if(resolveHost.fileExists(candidateFile)) {
+						return candidateFile;
+					}
+
+				} else {
+					return fileName;
+				}
+
 			}
+
+			return null;
 		}
 	};
 };
