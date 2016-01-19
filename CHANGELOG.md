@@ -1,6 +1,8 @@
 # rollup-plugin-typescript changelog
 
 ## master
+
+## 0.3.0
 * Author plugin in TypeScript
 * Report diagnostics
 * Resolve identifiers using `ts.nodeModuleNameResolver`
