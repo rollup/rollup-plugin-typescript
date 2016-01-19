@@ -1,1 +1,4 @@
 node_modules
+dist
+src/*.js
+test/sample/**/*.js
