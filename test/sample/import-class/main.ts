@@ -1,3 +1,3 @@
-import A from './A.ts';
+import A from './A';
 
 new A();
