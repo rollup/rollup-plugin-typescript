@@ -3,6 +3,8 @@ import { createFilter } from 'rollup-pluginutils';
 import { statSync } from 'fs';
 import assign from 'object-assign';
 
+import fixExportClass from './fixExportClass';
+
 const resolveHost = {
 	fileExists ( filePath: string ): boolean {
 		try {
@@ -47,7 +49,8 @@ export default function typescript ( options ) {
 		transform ( code: string, id: string ): { code: string, map: any } {
 			if ( !filter( id ) ) return null;
 
-			const transformed = ts.transpileModule( code, {
+			const transformed = ts.transpileModule( fixExportClass( code, id ), {
+				fileName: id,
 				reportDiagnostics: true,
 				compilerOptions: options
 			});
@@ -61,7 +64,7 @@ export default function typescript ( options ) {
 				if ( diagnostic.file ) {
 					const { line, character } = diagnostic.file.getLineAndCharacterOfPosition( diagnostic.start );
 
-					console.error( `${diagnostic.file.fileName}(${line + 1},${character + 1}): error ES${diagnostic.code}: ${message}` );
+					console.error( `${diagnostic.file.fileName}(${line + 1},${character + 1}): error TS${diagnostic.code}: ${message}` );
 				} else {
 					console.error( `Error: ${message}` );
 				}

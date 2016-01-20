@@ -4,6 +4,15 @@ var typescript = require( '..' );
 
 process.chdir( __dirname );
 
+// Evaluate a bundle (as CommonJS) and return its exports.
+function evaluate( bundle ) {
+	const module = { exports: {} };
+
+	new Function( 'module', 'exports', bundle.generate({ format: 'cjs' }).code )(module, module.exports);
+
+	return module.exports;
+}
+
 describe( 'rollup-plugin-typescript', function () {
 	this.timeout( 5000 );
 
@@ -22,6 +31,23 @@ describe( 'rollup-plugin-typescript', function () {
 		});
 	});
 
+	it( 'transpiles `export class A` correctly', function () {
+		return rollup.rollup({
+			entry: 'sample/export-class-fix/main.ts',
+			plugins: [
+				typescript()
+			]
+		}).then( function ( bundle ) {
+			const generated = bundle.generate();
+			const code = generated.code;
+
+			assert.equal( code.indexOf( 'class' ), -1, code );
+			assert.ok( code.indexOf( 'var A = (function' ) !== -1, code );
+			assert.ok( code.indexOf( 'var B = (function' ) !== -1, code );
+			assert.ok( code.indexOf( 'export { A, B };' ) !== -1, code );
+		});
+	});
+
 	it( 'transpiles ES6 features to ES5 with source maps', function () {
 		return rollup.rollup({
 			entry: 'sample/import-class/main.ts',
@@ -32,9 +58,9 @@ describe( 'rollup-plugin-typescript', function () {
 			const generated = bundle.generate();
 			const code = generated.code;
 
-			assert.ok( code.indexOf( 'class' ) === -1, code );
-			assert.ok( code.indexOf( '...' ) === -1, code );
-			assert.ok( code.indexOf( '=>' ) === -1, code );
+			assert.equal( code.indexOf( 'class' ), -1, code );
+			assert.equal( code.indexOf( '...' ), -1, code );
+			assert.equal( code.indexOf( '=>' ), -1, code );
 		});
 	});
 
@@ -46,6 +72,17 @@ describe( 'rollup-plugin-typescript', function () {
 			]
 		}).catch( function ( error ) {
 			assert.ok( error.message.indexOf( 'There were TypeScript errors' ) === 0, 'Should reject erroneous code.' );
+		});
+	});
+
+	it( 'should use named exports for classes', function () {
+		return rollup.rollup({
+			entry: 'sample/export-class/main.ts',
+			plugins: [
+				typescript()
+			]
+		}).then( function ( bundle ) {
+			assert.equal( evaluate( bundle ).foo, 'bar' );
 		});
 	});
 });

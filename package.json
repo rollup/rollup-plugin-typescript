@@ -27,12 +27,13 @@
   "dependencies": {
     "object-assign": "^4.0.1",
     "rollup-pluginutils": "^1.1.0",
+    "tippex": "^1.1.0",
     "typescript": "1.7.5"
   },
   "devDependencies": {
     "mocha": "^2.3.3",
     "rollup": "^0.25.0",
-    "rollup-plugin-typescript": "^0.2.0"
+    "rollup-plugin-typescript": "^0.3.0"
   },
   "repository": {
     "type": "git",
