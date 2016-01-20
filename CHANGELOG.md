@@ -2,6 +2,7 @@
 
 ## master
 * Overridable TypeScript version when transpiling
+* Add `jsx` support
 
 ## 0.3.0
 * Author plugin in TypeScript
