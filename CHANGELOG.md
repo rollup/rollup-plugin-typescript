@@ -1,8 +1,11 @@
 # rollup-plugin-typescript changelog
 
 ## master
-* Overridable TypeScript version when transpiling
-* Add `jsx` support
+
+### 0.4.0
+* Work around TypeScript 1.7.5's transpilation issues ([#9](https://github.com/rollup/rollup-plugin-typescript/issues/9))
+* Overridable TypeScript version when transpiling ([#4](https://github.com/rollup/rollup-plugin-typescript/issues/4))
+* Add `jsx` support ([#11](https://github.com/rollup/rollup-plugin-typescript/issues/11))
 
 ## 0.3.0
 * Author plugin in TypeScript
