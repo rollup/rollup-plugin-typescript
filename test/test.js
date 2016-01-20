@@ -4,6 +4,15 @@ var typescript = require( '..' );
 
 process.chdir( __dirname );
 
+// Evaluate a bundle (as CommonJS) and return its exports.
+function evaluate( bundle ) {
+	const module = { exports: {} };
+
+	new Function( 'module', 'exports', bundle.generate({ format: 'cjs' }).code )(module, module.exports);
+
+	return module.exports;
+}
+
 describe( 'rollup-plugin-typescript', function () {
 	this.timeout( 5000 );
 
@@ -67,25 +76,13 @@ describe( 'rollup-plugin-typescript', function () {
 	});
 
 	it( 'should use named exports for classes', function () {
-		var start = Date.now();
-
 		return rollup.rollup({
 			entry: 'sample/export-class/main.ts',
 			plugins: [
 				typescript()
 			]
 		}).then( function ( bundle ) {
-			console.log( 'bundled in %s ms', Date.now() - start );
-
-			start = Date.now();
-			const generated = bundle.generate();
-			console.log( 'generated in %s ms', Date.now() - start );
-
-			const code = generated.code;
-
-			console.log(code);
-
-			assert.ok( code.indexOf( 'Foo' ) !== -1, code );
+			assert.equal( evaluate( bundle ).foo, 'bar' );
 		});
 	});
 });
