@@ -85,4 +85,27 @@ describe( 'rollup-plugin-typescript', function () {
 			assert.equal( evaluate( bundle ).foo, 'bar' );
 		});
 	});
+
+	it( 'supports overriding the TypeScript version', function () {
+		return rollup.rollup({
+			entry: 'sample/overriding-typescript/main.ts',
+			plugins: [
+				typescript({
+					// test with a mocked version of TypeScript
+					typescript: {
+						transpileModule: function ( code ) {
+							// Ignore the code to transpile. Always return the same thing.
+							return {
+								outputText: 'export default 1337;',
+								diagnostics: [],
+								sourceMapText: JSON.stringify({ mappings: '' })
+							};
+						}
+					}
+				})
+			]
+		}).then( function ( bundle ) {
+			assert.equal( bundle.generate().code.indexOf( 'var main = 1337;' ), 0 );
+		});
+	});
 });
