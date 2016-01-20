@@ -27,6 +27,9 @@ export default function typescript ( options ) {
 	delete options.include;
 	delete options.exclude;
 
+	// Allow users to override the TypeScript version used for transpilation.
+	const typescript: typeof ts = options.typescript || ts;
+
 	options = assign( {
 		target: ts.ScriptTarget.ES5,
 		module: ts.ModuleKind.ES6,
@@ -37,7 +40,7 @@ export default function typescript ( options ) {
 		resolveId ( importee: string, importer: string ): string {
 			if ( !importer ) return null;
 
-			var result = ts.nodeModuleNameResolver( importee, importer, resolveHost );
+			var result = typescript.nodeModuleNameResolver( importee, importer, resolveHost );
 
 			if ( result.resolvedModule && result.resolvedModule.resolvedFileName ) {
 				return result.resolvedModule.resolvedFileName;
@@ -49,7 +52,7 @@ export default function typescript ( options ) {
 		transform ( code: string, id: string ): { code: string, map: any } {
 			if ( !filter( id ) ) return null;
 
-			const transformed = ts.transpileModule( fixExportClass( code, id ), {
+			const transformed = typescript.transpileModule( fixExportClass( code, id ), {
 				fileName: id,
 				reportDiagnostics: true,
 				compilerOptions: options
@@ -59,7 +62,7 @@ export default function typescript ( options ) {
 			let fatalError = false;
 
 			diagnostics.forEach( diagnostic => {
-				var message = ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n');
+				var message = typescript.flattenDiagnosticMessageText(diagnostic.messageText, '\n');
 
 				if ( diagnostic.file ) {
 					const { line, character } = diagnostic.file.getLineAndCharacterOfPosition( diagnostic.start );
