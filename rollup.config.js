@@ -7,6 +7,7 @@ export default {
 		'fs',
 		'object-assign',
 		'rollup-pluginutils',
+		'tippex',
 		'typescript'
 	],
 
