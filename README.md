@@ -29,6 +29,23 @@ export default {
 
 All options are as per the [Typescript's Compiler Options](https://github.com/Microsoft/TypeScript/wiki/Compiler-Options), except `options.include` and `options.exclude` (each a minimatch pattern, or array of minimatch patterns), which determine which files are transpiled by Typescript (all `.ts` and `.tsx` files by default).
 
+### JSX
+JSX can be enabled by setting the `jsx` option to one of `'none'`, `'preserve'`and `'react'`.
+```js
+// rollup.config.js
+import typescript from 'rollup-plugin-typescript';
+
+export default {
+  entry: './main.tsx',
+
+  plugins: [
+    typescript({
+      jsx: 'react'
+    })
+  ]
+}
+```
+
 ### TypeScript version
 rollup-plugin-typescript uses [TypeScript 1.7.5](https://github.com/Microsoft/TypeScript/wiki/Roadmap#17) per default. Should your project require it, you can override the TypeScript version used for _transpiling the sources_.
 

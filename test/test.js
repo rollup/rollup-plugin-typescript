@@ -23,8 +23,7 @@ describe( 'rollup-plugin-typescript', function () {
 				typescript()
 			]
 		}).then( function ( bundle ) {
-			const generated = bundle.generate();
-			const code = generated.code;
+			const code = bundle.generate().code;
 
 			assert.ok( code.indexOf( 'number' ) === -1, code );
 			assert.ok( code.indexOf( 'const' ) === -1, code );
@@ -38,8 +37,7 @@ describe( 'rollup-plugin-typescript', function () {
 				typescript()
 			]
 		}).then( function ( bundle ) {
-			const generated = bundle.generate();
-			const code = generated.code;
+			const code = bundle.generate().code;
 
 			assert.equal( code.indexOf( 'class' ), -1, code );
 			assert.ok( code.indexOf( 'var A = (function' ) !== -1, code );
@@ -55,8 +53,7 @@ describe( 'rollup-plugin-typescript', function () {
 				typescript()
 			]
 		}).then( function ( bundle ) {
-			const generated = bundle.generate();
-			const code = generated.code;
+			const code = bundle.generate().code;
 
 			assert.equal( code.indexOf( 'class' ), -1, code );
 			assert.equal( code.indexOf( '...' ), -1, code );
@@ -106,6 +103,21 @@ describe( 'rollup-plugin-typescript', function () {
 			]
 		}).then( function ( bundle ) {
 			assert.equal( bundle.generate().code.indexOf( 'var main = 1337;' ), 0 );
+		});
+	});
+
+	it( 'should transpile JSX if enabled', function () {
+		return rollup.rollup({
+			entry: 'sample/jsx/main.tsx',
+			plugins: [
+				typescript({
+					jsx: 'react'
+				})
+			]
+		}).then( function ( bundle ) {
+			const code = bundle.generate().code;
+
+			assert.ok( code.indexOf( 'React.createElement("span", null, "Yo!")' ) !== -1, code );
 		});
 	});
 });

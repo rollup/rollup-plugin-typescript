@@ -5,6 +5,11 @@ import assign from 'object-assign';
 
 import fixExportClass from './fixExportClass';
 
+const jsxOptions = {
+	'preserve': ts.JsxEmit.Preserve,
+	'react': ts.JsxEmit.React
+}
+
 const resolveHost = {
 	fileExists ( filePath: string ): boolean {
 		try {
@@ -29,6 +34,10 @@ export default function typescript ( options ) {
 
 	// Allow users to override the TypeScript version used for transpilation.
 	const typescript: typeof ts = options.typescript || ts;
+
+	if ( typeof options.jsx === 'string' ) {
+		options.jsx = jsxOptions[ options.jsx ] || ts.JsxEmit.None;
+	}
 
 	options = assign( {
 		target: ts.ScriptTarget.ES5,
