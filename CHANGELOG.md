@@ -1,6 +1,7 @@
 # rollup-plugin-typescript changelog
 
 ## master
+* Overridable TypeScript version when transpiling
 
 ## 0.3.0
 * Author plugin in TypeScript
