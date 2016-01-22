@@ -36,14 +36,14 @@ export default function fix ( code: string, id: string ): string {
 	// Erase comments, strings etc. to avoid erroneous matches for the Regex.
 	const cleanCode = tippex.erase( code );
 
-	const re = /export\s+(default\s+)?class(?:\s+(\w+))?/g;
+	const re = /export\s+(default\s+)?((?:abstract\s+)?class)(?:\s+(\w+))?/g;
 	let match;
 
 	while ( match = re.exec( cleanCode ) ) {
 		// To keep source maps intact, replace non-whitespace characters with spaces.
-		code = erase( code, match.index, match[ 0 ].indexOf( 'class' ) );
+		code = erase( code, match.index, match[ 0 ].indexOf( match[ 2 ] ) );
 
-		let name = match[ 2 ];
+		let name = match[ 3 ];
 
 		if ( match[ 1 ] ) { // it is a default export
 
