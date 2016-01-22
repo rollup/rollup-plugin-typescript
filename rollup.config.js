@@ -26,7 +26,7 @@ function verbatim( options ) {
 	if ( !options || !options.names ) return {};
 
 	return {
-		transform ( code, id ) {
+		transform: function ( code, id ) {
 			if ( options.names.indexOf( id ) >= 0 ) {
 				return {
 					code: 'export default ' + JSON.stringify( code ) + ';',
