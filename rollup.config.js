@@ -1,4 +1,5 @@
 import typescript from 'rollup-plugin-typescript';
+import { resolve } from 'path';
 
 export default {
 	entry: 'src/index.ts',
@@ -12,6 +13,26 @@ export default {
 	],
 
 	plugins: [
+		verbatim({
+			names: [
+				resolve( 'src', 'typescript-helpers.ts')
+			]
+		}),
 		typescript()
 	]
 };
+
+function verbatim( options ) {
+	if ( !options || !options.names ) return {};
+
+	return {
+		transform ( code, id ) {
+			if ( options.names.indexOf( id ) >= 0 ) {
+				return {
+					code: 'export default ' + JSON.stringify( code ) + ';',
+					map: { mappings: '' }
+				};
+			}
+		}
+	}
+}

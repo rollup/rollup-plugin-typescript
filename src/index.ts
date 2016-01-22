@@ -3,6 +3,9 @@ import { createFilter } from 'rollup-pluginutils';
 import { statSync } from 'fs';
 import assign from 'object-assign';
 
+// This is loaded verbatim.
+import helpersTemplate from './typescript-helpers.ts';
+
 import { endsWith } from './string';
 import fixExportClass from './fixExportClass';
 
@@ -44,13 +47,23 @@ export default function typescript ( options ) {
 	}
 
 	options = assign( {
+		noEmitHelpers: true,
 		target: ts.ScriptTarget.ES5,
 		module: ts.ModuleKind.ES6,
 		sourceMap: true
 	}, options );
 
 	return {
+		load ( id ) {
+			if ( id === 'typescript-helpers' ) {
+				return helpersTemplate;
+			}
+		},
+
 		resolveId ( importee: string, importer: string ): string {
+			// Handle the special `typescript-helpers` import itself.
+			if ( importee === 'typescript-helpers' ) return 'typescript-helpers';
+
 			if ( !importer ) return null;
 
 			var result = typescript.nodeModuleNameResolver( importee, importer, resolveHost );
@@ -99,7 +112,10 @@ export default function typescript ( options ) {
 			}
 
 			return {
-				code: transformed.outputText,
+				// Always append an import for the helpers.
+				code: transformed.outputText +
+					`\nimport { __extends, __decorate, __metadata, __param, __awaiter } from 'typescript-helpers';`,
+
 				// Rollup expects `map` to be an object so we must parse the string
 				map: JSON.parse(transformed.sourceMapText)
 			};
