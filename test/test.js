@@ -72,6 +72,13 @@ describe( 'rollup-plugin-typescript', function () {
 		});
 	});
 
+	it( 'works with named exports for abstract classes', function () {
+		return bundle( 'sample/export-abstract-class/main.ts' ).then(function ( bundle ) {
+			const code = bundle.generate().code;
+			assert.ok( code.length > 0, code );
+		});
+	});
+
 	it( 'should use named exports for classes', function () {
 		return bundle( 'sample/export-class/main.ts' ).then( function ( bundle ) {
 			assert.equal( evaluate( bundle ).foo, 'bar' );
