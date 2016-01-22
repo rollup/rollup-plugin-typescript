@@ -106,6 +106,17 @@ describe( 'rollup-plugin-typescript', function () {
 		});
 	});
 
+	it( 'should not resolve .d.ts files', function () {
+		return rollup.rollup({
+			entry: 'sample/dts/main.ts',
+			plugins: [
+				typescript()
+			]
+		}).then( function ( bundle ) {
+			assert.deepEqual( bundle.imports, [ 'an-import' ] );
+		});
+	});
+
 	it( 'should transpile JSX if enabled', function () {
 		return rollup.rollup({
 			entry: 'sample/jsx/main.tsx',
