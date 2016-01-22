@@ -2,6 +2,7 @@
 
 ## master
 * Do not duplicate TypeScript's helpers ([#24](https://github.com/rollup/rollup-plugin-typescript/issues/24)
+* Handle `export abstract class` ([#23](https://github.com/rollup/rollup-plugin-typescript/issues/23)
 
 ### 0.4.1
 * Does not attempt resolve or transform `.d.ts` files ([#22](https://github.com/rollup/rollup-plugin-typescript/pull/22))
