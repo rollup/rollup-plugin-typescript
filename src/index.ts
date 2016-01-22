@@ -3,6 +3,7 @@ import { createFilter } from 'rollup-pluginutils';
 import { statSync } from 'fs';
 import assign from 'object-assign';
 
+import { endsWith } from './string';
 import fixExportClass from './fixExportClass';
 
 const jsxOptions = {
@@ -28,7 +29,10 @@ function goodErrors ( diagnostic: ts.Diagnostic ): boolean {
 export default function typescript ( options ) {
 	options = assign( {}, options || {} );
 
-	const filter = createFilter( options.include || [ '*.ts+(|x)', '**/*.ts+(|x)' ], options.exclude );
+	const filter = createFilter(
+		options.include || [ '*.ts+(|x)', '**/*.ts+(|x)' ],
+		options.exclude || [ '*.d.ts', '**/*.d.ts' ] );
+
 	delete options.include;
 	delete options.exclude;
 
@@ -52,6 +56,10 @@ export default function typescript ( options ) {
 			var result = typescript.nodeModuleNameResolver( importee, importer, resolveHost );
 
 			if ( result.resolvedModule && result.resolvedModule.resolvedFileName ) {
+				if ( endsWith( result.resolvedModule.resolvedFileName, '.d.ts' ) ) {
+					return null;
+				}
+
 				return result.resolvedModule.resolvedFileName;
 			}
 
