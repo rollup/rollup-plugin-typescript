@@ -27,6 +27,7 @@
     "prebuild": "rm -rf dist/*"
   },
   "dependencies": {
+    "compare-versions": "2.0.1",
     "object-assign": "^4.0.1",
     "rollup-pluginutils": "^1.1.0",
     "tippex": "^1.1.0",
