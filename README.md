@@ -47,7 +47,7 @@ export default {
 ```
 
 ### TypeScript version
-rollup-plugin-typescript uses [TypeScript 1.7.5](https://github.com/Microsoft/TypeScript/wiki/Roadmap#17) per default. Should your project require it, you can override the TypeScript version used for _transpiling the sources_.
+rollup-plugin-typescript uses [TypeScript 1.8.7](https://github.com/Microsoft/TypeScript/wiki/Roadmap#18) per default. Should your project require it, you can override the TypeScript version used for _transpiling the sources_.
 
 ```js
 typescript({
@@ -56,24 +56,7 @@ typescript({
 ```
 
 ## Issues
-
-TypeScript 1.6.2 isn't able to transpile to ES5 while preserving ES2015 modules. That's why this plugin requires [TypeScript 1.7.0](https://github.com/Microsoft/TypeScript/wiki/Roadmap#17) or greater. The ScriptTarget can always be changed should your project require it! :rocket:
-
-```js
-// rollup.config.js
-import typescript from 'rollup-plugin-typescript';
-import * as ts from 'typescript';
-
-export default {
-  entry: './main.ts',
-
-  plugins: [
-    typescript({
-      target: ts.ScriptTarget.ES6
-    })
-  ]
-}
-```
+Emit-less types, see [#28](https://github.com/rollup/rollup-plugin-typescript/issues/28).
 
 ## License
 

@@ -2,6 +2,11 @@
 
 ## master
 
+## 0.6.0
+* Upgrade to TypeScript ^1.8.7
+* Update `__awaiter` helper to support TypeScript 1.8.x ([#32](https://github.com/rollup/rollup-plugin-typescript/pull/32))
+* Update `ts.nodeModuleNameResolver` to support both 1.7.x and 1.8.x ([#31](https://github.com/rollup/rollup-plugin-typescript/issues/31))
+
 ## 0.5.0
 * Do not duplicate TypeScript's helpers ([#24](https://github.com/rollup/rollup-plugin-typescript/issues/24))
 * Handle `export abstract class` ([#23](https://github.com/rollup/rollup-plugin-typescript/issues/23))

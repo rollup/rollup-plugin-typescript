@@ -1,6 +1,6 @@
 {
   "name": "rollup-plugin-typescript",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Seamless integration between Rollup and TypeScript.",
   "main": "dist/rollup-plugin-typescript.cjs.js",
   "jsnext:main": "dist/rollup-plugin-typescript.es6.js",
@@ -18,7 +18,7 @@
   "homepage": "https://github.com/rollup/rollup-plugin-typescript",
   "author": "Oskar Segersvärd",
   "scripts": {
-    "test": "mocha",
+    "test": "mocha --harmony",
     "prepublish": "npm run test",
     "pretest": "npm run build",
     "build:cjs": "rollup -c -f cjs -o dist/rollup-plugin-typescript.cjs.js",
@@ -36,7 +36,7 @@
   "devDependencies": {
     "mocha": "^2.3.3",
     "rollup": "^0.25.4",
-    "rollup-plugin-typescript": "^0.4.0"
+    "rollup-plugin-typescript": "^0.5.0"
   },
   "repository": {
     "type": "git",
