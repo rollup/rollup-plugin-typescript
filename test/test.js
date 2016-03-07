@@ -33,6 +33,15 @@ describe( 'rollup-plugin-typescript', function () {
 		});
 	});
 
+	it( 'handles async functions', function () {
+		return bundle( 'sample/async/main.ts' )
+			.then( function ( bundle ) {
+				const wait = evaluate( bundle );
+
+				return wait( 3 );
+			});
+	});
+
 	it( 'does not duplicate helpers', function () {
 		return bundle( 'sample/dedup-helpers/main.ts' ).then( function ( bundle ) {
 			const code = bundle.generate().code;

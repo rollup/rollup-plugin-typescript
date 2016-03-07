@@ -5,6 +5,7 @@ export default {
 	entry: 'src/index.ts',
 
 	external: [
+		'compare-versions',
 		'fs',
 		'object-assign',
 		'rollup-pluginutils',

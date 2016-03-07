@@ -2,13 +2,20 @@ import * as ts from 'typescript';
 import { createFilter } from 'rollup-pluginutils';
 import { statSync } from 'fs';
 import assign from 'object-assign';
-import * as compareVersions from 'compare-versions';
+import compareVersions from 'compare-versions';
 
 // This is loaded verbatim.
 import helpersTemplate from './typescript-helpers.ts';
 
 import { endsWith } from './string';
 import fixExportClass from './fixExportClass';
+
+interface OtherOptions {
+	include: string | string[];
+	exclude: string | string[];
+	typescript: typeof ts;
+	jsx: string;
+}
 
 const jsxOptions = {
 	'preserve': ts.JsxEmit.Preserve,
@@ -30,7 +37,7 @@ function goodErrors ( diagnostic: ts.Diagnostic ): boolean {
 	return diagnostic.code !== 1204;
 }
 
-export default function typescript ( options ) {
+export default function typescript ( options: ts.CompilerOptions & OtherOptions ) {
 	options = assign( {}, options || {} );
 
 	const filter = createFilter(
@@ -72,7 +79,7 @@ export default function typescript ( options ) {
 			if ( compareVersions( typescript.version, '1.8.0' ) < 0 ) {
 				result = typescript.nodeModuleNameResolver( importee, importer, resolveHost );
 			} else {
-				result = typescript.nodeModuleNameResolver( importee, importer, {}, resolveHost );
+				result = typescript.nodeModuleNameResolver( importee, importer, options, resolveHost );
 			}
 
 			if ( result.resolvedModule && result.resolvedModule.resolvedFileName ) {
