@@ -2,6 +2,7 @@ import * as ts from 'typescript';
 import { createFilter } from 'rollup-pluginutils';
 import { statSync } from 'fs';
 import assign from 'object-assign';
+import * as compareVersions from 'compare-versions';
 
 // This is loaded verbatim.
 import helpersTemplate from './typescript-helpers.ts';
@@ -66,7 +67,13 @@ export default function typescript ( options ) {
 
 			if ( !importer ) return null;
 
-			var result = typescript.nodeModuleNameResolver( importee, importer, resolveHost );
+			var result;
+
+			if ( compareVersions( typescript.version, '1.8.0' ) < 0 ) {
+				result = typescript.nodeModuleNameResolver( importee, importer, resolveHost );
+			} else {
+				result = typescript.nodeModuleNameResolver( importee, importer, {}, resolveHost );
+			}
 
 			if ( result.resolvedModule && result.resolvedModule.resolvedFileName ) {
 				if ( endsWith( result.resolvedModule.resolvedFileName, '.d.ts' ) ) {
