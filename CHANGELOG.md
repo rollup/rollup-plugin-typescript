@@ -2,6 +2,10 @@
 
 ## master
 
+## 0.6.1
+* Upgrade Tippex to ^2.1.0
+* Upgrade TypeScript to ^1.8.9
+
 ## 0.6.0
 * Upgrade to TypeScript ^1.8.7
 * Update `__awaiter` helper to support TypeScript 1.8.x ([#32](https://github.com/rollup/rollup-plugin-typescript/pull/32))
