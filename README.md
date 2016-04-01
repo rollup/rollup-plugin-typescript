@@ -47,7 +47,7 @@ export default {
 ```
 
 ### TypeScript version
-rollup-plugin-typescript uses [TypeScript 1.8.7](https://github.com/Microsoft/TypeScript/wiki/Roadmap#18) per default. Should your project require it, you can override the TypeScript version used for _transpiling the sources_.
+rollup-plugin-typescript uses [TypeScript 1.8.9](https://github.com/Microsoft/TypeScript/wiki/Roadmap#18) per default. Should your project require it, you can override the TypeScript version used for _transpiling the sources_.
 
 ```js
 typescript({
