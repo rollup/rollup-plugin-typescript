@@ -1,25 +1,26 @@
 import * as ts from 'typescript';
 import { createFilter } from 'rollup-pluginutils';
-import { statSync } from 'fs';
+import * as path from 'path';
+import {
+	existsSync,
+	readFileSync,
+	statSync,
+} from 'fs';
 import assign from 'object-assign';
 import compareVersions from 'compare-versions';
 
 // This is loaded verbatim.
-import helpersTemplate from './typescript-helpers.ts';
+import helpersTemplate from './typescript-helpers.js';
 
 import { endsWith } from './string';
 import fixExportClass from './fixExportClass';
 
-interface OtherOptions {
-	include: string | string[];
-	exclude: string | string[];
-	typescript: typeof ts;
-	jsx: string;
-}
-
-const jsxOptions = {
-	'preserve': ts.JsxEmit.Preserve,
-	'react': ts.JsxEmit.React
+interface Options {
+	tsconfig?: boolean;
+	include?: string | string[];
+	exclude?: string | string[];
+	typescript?: typeof ts;
+	module?: string;
 }
 
 const resolveHost = {
@@ -37,7 +38,48 @@ function goodErrors ( diagnostic: ts.Diagnostic ): boolean {
 	return diagnostic.code !== 1204;
 }
 
-export default function typescript ( options: ts.CompilerOptions & OtherOptions ) {
+function getDefaultOptions(): any {
+	return {
+		noEmitHelpers: true,
+		module: 'es2015',
+		sourceMap: true
+	};
+}
+
+// Gratefully lifted from 'look-up', due to problems using it directly:
+//   https://github.com/jonschlinkert/look-up/blob/master/index.js
+//   MIT Licenced
+function findFile( cwd: string, filename: string ): string {
+	let fp = cwd ? ( cwd + '/' + filename ) : filename;
+
+	if ( existsSync( fp ) ) {
+		return fp;
+	}
+
+	const segs = cwd.split( path.sep );
+	let len = segs.length;
+
+	while ( len-- ) {
+		cwd = segs.slice( 0, len ).join( '/' );
+		fp = cwd + '/' + filename;
+		if ( existsSync( fp ) ) {
+			return fp;
+		}
+	}
+	return null;
+}
+
+function compilerOptionsFromTsConfig( typescript: typeof ts ): ts.CompilerOptions {
+	const cwd = process.cwd();
+
+	const tsconfig = typescript.readConfigFile( findFile( cwd, 'tsconfig.json' ), path => readFileSync( path, 'utf8' ) );
+
+	if ( !tsconfig.config || !tsconfig.config.compilerOptions ) return {};
+
+	return tsconfig.config.compilerOptions;
+}
+
+export default function typescript ( options: Options ) {
 	options = assign( {}, options || {} );
 
 	const filter = createFilter(
@@ -50,19 +92,30 @@ export default function typescript ( options: ts.CompilerOptions & OtherOptions
 	// Allow users to override the TypeScript version used for transpilation.
 	const typescript: typeof ts = options.typescript || ts;
 
-	if ( typeof options.jsx === 'string' ) {
-		options.jsx = jsxOptions[ options.jsx ] || ts.JsxEmit.None;
+	// Load options from `tsconfig.json` unless explicitly asked not to.
+	const tsconfig = options.tsconfig === false ? {} :
+		compilerOptionsFromTsConfig( typescript );
+
+	// Merge all options.
+	options = assign( tsconfig, getDefaultOptions(), options );
+
+	// Verify that we're targeting ES2015 modules.
+	if ( options.module !== 'es2015' && options.module !== 'es6' ) {
+		throw new Error( `rollup-plugin-typescript: The module kind should be 'es2015', found: '${ options.module }'` );
 	}
 
-	options = assign( {
-		noEmitHelpers: true,
-		target: ts.ScriptTarget.ES5,
-		module: ts.ModuleKind.ES6,
-		sourceMap: true
-	}, options );
+	const parsed = typescript.convertCompilerOptionsFromJson( options, process.cwd() );
+
+	if ( parsed.errors.length ) {
+		parsed.errors.forEach( error => console.error( `rollup-plugin-typescript: ${ error.messageText }` ) );
+
+		throw new Error( `rollup-plugin-typescript: Couldn't process compiler options` );
+	}
+
+	const compilerOptions = parsed.options;
 
 	return {
-		load ( id ) {
+		load ( id: string ) {
 			if ( id === 'typescript-helpers' ) {
 				return helpersTemplate;
 			}
@@ -74,12 +127,13 @@ export default function typescript ( options: ts.CompilerOptions & OtherOptions
 
 			if ( !importer ) return null;
 
-			var result;
+			var result: ts.ResolvedModuleWithFailedLookupLocations;
 
 			if ( compareVersions( typescript.version, '1.8.0' ) < 0 ) {
-				result = typescript.nodeModuleNameResolver( importee, importer, resolveHost );
+				// Suppress TypeScript warnings for function call.
+				result = (typescript as any).nodeModuleNameResolver( importee, importer, resolveHost );
 			} else {
-				result = typescript.nodeModuleNameResolver( importee, importer, options, resolveHost );
+				result = typescript.nodeModuleNameResolver( importee, importer, compilerOptions, resolveHost );
 			}
 
 			if ( result.resolvedModule && result.resolvedModule.resolvedFileName ) {
@@ -99,7 +153,7 @@ export default function typescript ( options: ts.CompilerOptions & OtherOptions
 			const transformed = typescript.transpileModule( fixExportClass( code, id ), {
 				fileName: id,
 				reportDiagnostics: true,
-				compilerOptions: options
+				compilerOptions
 			});
 
 			const diagnostics = transformed.diagnostics.filter( goodErrors );

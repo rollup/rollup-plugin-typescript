@@ -16,7 +16,7 @@ export default {
 	plugins: [
 		verbatim({
 			names: [
-				resolve( 'src', 'typescript-helpers.ts')
+				resolve( 'src/typescript-helpers.js' )
 			]
 		}),
 		typescript()

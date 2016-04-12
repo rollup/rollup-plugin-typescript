@@ -14,10 +14,10 @@ function evaluate( bundle ) {
 }
 
 // Short-hand for rollup using the typescript plugin.
-function bundle( main ) {
+function bundle( main, options ) {
 	return rollup.rollup({
 		entry: main,
-		plugins: [ typescript() ]
+		plugins: [ typescript( options ) ]
 	});
 }
 
@@ -99,6 +99,9 @@ describe( 'rollup-plugin-typescript', function () {
 			entry: 'sample/overriding-typescript/main.ts',
 			plugins: [
 				typescript({
+					// Don't use `tsconfig.json`
+					tsconfig: false,
+
 					// test with a mocked version of TypeScript
 					typescript: {
 						transpileModule: function ( code ) {
@@ -108,6 +111,11 @@ describe( 'rollup-plugin-typescript', function () {
 								diagnostics: [],
 								sourceMapText: JSON.stringify({ mappings: '' })
 							};
+						},
+
+						// return empty compiler options
+						convertCompilerOptionsFromJson: function () {
+							return { options: {}, errors: [] };
 						}
 					}
 				})
@@ -124,17 +132,18 @@ describe( 'rollup-plugin-typescript', function () {
 	});
 
 	it( 'should transpile JSX if enabled', function () {
-		return rollup.rollup({
-			entry: 'sample/jsx/main.tsx',
-			plugins: [
-				typescript({
-					jsx: 'react'
-				})
-			]
-		}).then( function ( bundle ) {
+		return bundle( 'sample/jsx/main.tsx', { jsx: 'react' }).then( function ( bundle ) {
 			const code = bundle.generate().code;
 
 			assert.ok( code.indexOf( 'React.createElement("span", null, "Yo!")' ) !== -1, code );
 		});
+	});
+
+	it( 'should throw on bad options', function () {
+		assert.throws( function () {
+			bundle( 'does-not-matter.ts', {
+				foo: 'bar'
+			});
+		}, /Couldn't process compiler options/ );
 	});
 });
