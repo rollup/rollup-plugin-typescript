@@ -2,6 +2,9 @@
 
 ## master
 
+## 0.7.0
+* Use `compilerOptions` from `tsconfig.json` if found ([#39](https://github.com/rollup/rollup-plugin-typescript/pull/32))
+
 ## 0.6.1
 * Upgrade Tippex to ^2.1.0
 * Upgrade TypeScript to ^1.8.9

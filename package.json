@@ -1,6 +1,6 @@
 {
   "name": "rollup-plugin-typescript",
-  "version": "0.6.1",
+  "version": "0.7.0",
   "description": "Seamless integration between Rollup and TypeScript.",
   "main": "dist/rollup-plugin-typescript.cjs.js",
   "jsnext:main": "dist/rollup-plugin-typescript.es6.js",
