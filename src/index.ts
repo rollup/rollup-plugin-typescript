@@ -92,9 +92,13 @@ export default function typescript ( options: Options ) {
 	// Allow users to override the TypeScript version used for transpilation.
 	const typescript: typeof ts = options.typescript || ts;
 
+	delete options.typescript;
+
 	// Load options from `tsconfig.json` unless explicitly asked not to.
 	const tsconfig = options.tsconfig === false ? {} :
 		compilerOptionsFromTsConfig( typescript );
+
+	delete options.tsconfig;
 
 	// Merge all options.
 	options = assign( tsconfig, getDefaultOptions(), options );

@@ -114,7 +114,18 @@ describe( 'rollup-plugin-typescript', function () {
 						},
 
 						// return empty compiler options
-						convertCompilerOptionsFromJson: function () {
+						convertCompilerOptionsFromJson: function ( options ) {
+							[
+								'include',
+								'exclude',
+								'typescript',
+								'tsconfig',
+							].forEach( function ( option ) {
+								if ( option in options ) {
+									throw new Error( 'unrecognized compiler option "' + option + '"' );
+								}
+							});
+
 							return { options: {}, errors: [] };
 						}
 					}
