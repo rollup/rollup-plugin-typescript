@@ -79,6 +79,15 @@ function compilerOptionsFromTsConfig( typescript: typeof ts ): ts.CompilerOption
 	return tsconfig.config.compilerOptions;
 }
 
+// Set `sourceMap` to `inlineSourceMap` if it's a boolean,
+// under the assumption that both are never specified simultaneously.
+function fixSourceMapOption( options: any ) {
+	if ( typeof options.inlineSourceMap === 'boolean' ) {
+		options.sourceMap = options.inlineSourceMap;
+		delete options.inlineSourceMap;
+	}
+}
+
 export default function typescript ( options: Options ) {
 	options = assign( {}, options || {} );
 
@@ -99,6 +108,11 @@ export default function typescript ( options: Options ) {
 		compilerOptionsFromTsConfig( typescript );
 
 	delete options.tsconfig;
+
+	// Since Rollup handles the source maps; we equate the
+	// `sourceMap` and `inlineSourceMap` options.
+	fixSourceMapOption( tsconfig );
+	fixSourceMapOption( options );
 
 	// Merge all options.
 	options = assign( tsconfig, getDefaultOptions(), options );

@@ -157,4 +157,10 @@ describe( 'rollup-plugin-typescript', function () {
 			});
 		}, /Couldn't process compiler options/ );
 	});
+
+	it( 'prevents errors due to conflicting `sourceMap`/`inlineSourceMap` options', function () {
+		return bundle( 'sample/overriding-typescript/main.ts', {
+			inlineSourceMap: true,
+		});
+	});
 });
