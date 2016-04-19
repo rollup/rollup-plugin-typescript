@@ -2,6 +2,9 @@
 
 ## master
 
+## 0.7.3
+* Update Tippex to ^2.1.1
+
 ## 0.7.2
 * Don't error if both `sourceMap` and `inlineSourceMap` are specified
 
