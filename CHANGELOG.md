@@ -2,6 +2,9 @@
 
 ## master
 
+## 0.7.2
+* Don't error if both `sourceMap` and `inlineSourceMap` are specified
+
 ## 0.7.1
 * No plugin specific options should be forwarded to TypeScript
 
