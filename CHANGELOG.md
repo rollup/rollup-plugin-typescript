@@ -1,6 +1,7 @@
 # rollup-plugin-typescript changelog
 
 ## master
+* Resolve typescript-helpers to a file in the filesystem.
 
 ## 0.7.3
 * Update Tippex to ^2.1.1
