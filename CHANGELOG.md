@@ -1,6 +1,8 @@
 # rollup-plugin-typescript changelog
 
 ## master
+
+## 0.7.4
 * Resolve typescript-helpers to a file in the filesystem.
 
 ## 0.7.3
