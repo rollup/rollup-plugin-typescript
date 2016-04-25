@@ -2,6 +2,9 @@
 
 ## master
 
+## 0.7.5
+* Ensure NPM doesn't ignore typescript-helpers
+
 ## 0.7.4
 * Resolve typescript-helpers to a file in the filesystem.
 
