@@ -133,7 +133,7 @@ export default function typescript ( options: Options ) {
 		resolveId ( importee: string, importer: string ): string {
 			// Handle the special `typescript-helpers` import itself.
 			if ( importee === 'typescript-helpers' ) {
-				return path.resolve( __dirname, '../typescript-helpers.js' );
+				return path.resolve( __dirname, '../src/typescript-helpers.js' );
 			}
 
 			if ( !importer ) return null;
