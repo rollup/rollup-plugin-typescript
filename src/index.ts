@@ -9,9 +9,6 @@ import {
 import assign from 'object-assign';
 import compareVersions from 'compare-versions';
 
-// This is loaded verbatim.
-import helpersTemplate from './typescript-helpers.js';
-
 import { endsWith } from './string';
 import fixExportClass from './fixExportClass';
 
@@ -133,15 +130,11 @@ export default function typescript ( options: Options ) {
 	const compilerOptions = parsed.options;
 
 	return {
-		load ( id: string ) {
-			if ( id === 'typescript-helpers' ) {
-				return helpersTemplate;
-			}
-		},
-
 		resolveId ( importee: string, importer: string ): string {
 			// Handle the special `typescript-helpers` import itself.
-			if ( importee === 'typescript-helpers' ) return 'typescript-helpers';
+			if ( importee === 'typescript-helpers' ) {
+				return path.resolve( __dirname, '../typescript-helpers.js' );
+			}
 
 			if ( !importer ) return null;
 
