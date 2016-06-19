@@ -2,6 +2,9 @@
 
 ## master
 
+## 0.7.6
+* Ignore the `declaration` option ([#45](https://github.com/rollup/rollup-plugin-typescript/issues/45))
+
 ## 0.7.5
 * Ensure NPM doesn't ignore typescript-helpers
 

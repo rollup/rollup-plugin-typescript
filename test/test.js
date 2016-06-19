@@ -33,6 +33,10 @@ describe( 'rollup-plugin-typescript', function () {
 		});
 	});
 
+	it( 'ignores the declaration option', function () {
+		return bundle( 'sample/basic/main.ts', { declaration: true });
+	});
+
 	it( 'handles async functions', function () {
 		return bundle( 'sample/async/main.ts' )
 			.then( function ( bundle ) {
