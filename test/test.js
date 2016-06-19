@@ -1,5 +1,6 @@
 var assert = require( 'assert' );
 var rollup = require( 'rollup' );
+var assign = require( 'object-assign' );
 var typescript = require( '..' );
 
 process.chdir( __dirname );
@@ -31,6 +32,10 @@ describe( 'rollup-plugin-typescript', function () {
 			assert.ok( code.indexOf( 'number' ) === -1, code );
 			assert.ok( code.indexOf( 'const' ) === -1, code );
 		});
+	});
+
+	it( 'ignores the declaration option', function () {
+		return bundle( 'sample/basic/main.ts', { declaration: true });
 	});
 
 	it( 'handles async functions', function () {
@@ -103,7 +108,9 @@ describe( 'rollup-plugin-typescript', function () {
 					tsconfig: false,
 
 					// test with a mocked version of TypeScript
-					typescript: {
+					typescript: fakeTypescript({
+						version: '1.8.0-fake',
+
 						transpileModule: function ( code ) {
 							// Ignore the code to transpile. Always return the same thing.
 							return {
@@ -111,28 +118,59 @@ describe( 'rollup-plugin-typescript', function () {
 								diagnostics: [],
 								sourceMapText: JSON.stringify({ mappings: '' })
 							};
-						},
-
-						// return empty compiler options
-						convertCompilerOptionsFromJson: function ( options ) {
-							[
-								'include',
-								'exclude',
-								'typescript',
-								'tsconfig',
-							].forEach( function ( option ) {
-								if ( option in options ) {
-									throw new Error( 'unrecognized compiler option "' + option + '"' );
-								}
-							});
-
-							return { options: {}, errors: [] };
 						}
-					}
+					})
 				})
 			]
 		}).then( function ( bundle ) {
-			assert.equal( bundle.generate().code.indexOf( 'var main = 1337;' ), 0 );
+			assert.equal( evaluate( bundle ), 1337 );
+		});
+	});
+
+	describe( 'strictNullChecks', function () {
+		it( 'is enabled for versions >= 1.9.0', function () {
+			return bundle( 'sample/overriding-typescript/main.ts', {
+				tsconfig: false,
+				strictNullChecks: true,
+
+				typescript: fakeTypescript({
+					version: '1.9.0-fake',
+					transpileModule: function ( code, options ) {
+						assert.ok( options.compilerOptions.strictNullChecks,
+							'strictNullChecks should be passed through' );
+
+						return {
+							outputText: '',
+							diagnostics: [],
+							sourceMapText: JSON.stringify({ mappings: '' })
+						};
+					}
+				}),
+			});
+		});
+
+		it( 'is disabled with a warning < 1.9.0', function () {
+			var warning = '';
+
+			console.warn = function (msg) {
+				warning = msg;
+			};
+
+			return rollup.rollup({
+				entry: 'sample/overriding-typescript/main.ts',
+				plugins: [
+					typescript({
+						tsconfig: false,
+						strictNullChecks: true,
+
+						typescript: fakeTypescript({
+							version: '1.8.0-fake',
+						})
+					})
+				]
+			}).then( function () {
+				assert.notEqual( warning.indexOf( "'strictNullChecks' is not supported" ), -1 );
+			});
 		});
 	});
 
@@ -164,3 +202,33 @@ describe( 'rollup-plugin-typescript', function () {
 		});
 	});
 });
+
+function fakeTypescript( custom ) {
+	return assign({
+		transpileModule: function ( code, options ) {
+			return {
+				outputText: '',
+				diagnostics: [],
+				sourceMapText: JSON.stringify({ mappings: '' })
+			};
+		},
+
+		convertCompilerOptionsFromJson: function ( options ) {
+			[
+				'include',
+				'exclude',
+				'typescript',
+				'tsconfig',
+			].forEach( function ( option ) {
+				if ( option in options ) {
+					throw new Error( 'unrecognized compiler option "' + option + '"' );
+				}
+			});
+
+			return {
+				options: options,
+				errors: []
+			};
+		}
+	}, custom);
+}
