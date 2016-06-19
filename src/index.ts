@@ -21,6 +21,13 @@ interface Options {
 }
 
 const resolveHost = {
+	directoryExists ( dirPath: string ): boolean {
+		try {
+			return statSync( dirPath ).isDirectory();
+		} catch ( err ) {
+			return false;
+		}
+	},
 	fileExists ( filePath: string ): boolean {
 		try {
 			return statSync( filePath ).isFile();
@@ -63,6 +70,7 @@ function findFile( cwd: string, filename: string ): string {
 			return fp;
 		}
 	}
+
 	return null;
 }
 
@@ -76,7 +84,7 @@ function compilerOptionsFromTsConfig( typescript: typeof ts ): ts.CompilerOption
 	return tsconfig.config.compilerOptions;
 }
 
-function adjustCompilerOptions( options: any ) {
+function adjustCompilerOptions( typescript: typeof ts, options: any ) {
 	// Set `sourceMap` to `inlineSourceMap` if it's a boolean
 	// under the assumption that both are never specified simultaneously.
 	if ( typeof options.inlineSourceMap === 'boolean' ) {
@@ -87,6 +95,13 @@ function adjustCompilerOptions( options: any ) {
 	// Delete the `declaration` option to prevent compilation error.
 	// See: https://github.com/rollup/rollup-plugin-typescript/issues/45
 	delete options.declaration;
+
+	const tsVersion = typescript.version.split('-')[0];
+	if ( 'strictNullChecks' in options && compareVersions( tsVersion, '1.9.0' ) < 0 ) {
+		delete options.strictNullChecks;
+
+		console.warn( `rollup-plugin-typescript: 'strictNullChecks' is not supported; disabling it` );
+	}
 }
 
 export default function typescript ( options: Options ) {
@@ -112,8 +127,8 @@ export default function typescript ( options: Options ) {
 
 	// Since the CompilerOptions aren't designed for the Rollup
 	// use case, we'll adjust them for use with Rollup.
-	adjustCompilerOptions( tsconfig );
-	adjustCompilerOptions( options );
+	adjustCompilerOptions( typescript, tsconfig );
+	adjustCompilerOptions( typescript, options );
 
 	// Merge all options.
 	options = assign( tsconfig, getDefaultOptions(), options );
@@ -171,7 +186,9 @@ export default function typescript ( options: Options ) {
 				compilerOptions
 			});
 
-			const diagnostics = transformed.diagnostics.filter( goodErrors );
+			const diagnostics = transformed.diagnostics ?
+				transformed.diagnostics.filter( goodErrors ) : [];
+
 			let fatalError = false;
 
 			diagnostics.forEach( diagnostic => {
@@ -200,7 +217,7 @@ export default function typescript ( options: Options ) {
 					`\nimport { __extends, __decorate, __metadata, __param, __awaiter } from 'typescript-helpers';`,
 
 				// Rollup expects `map` to be an object so we must parse the string
-				map: JSON.parse(transformed.sourceMapText)
+				map: JSON.parse(transformed.sourceMapText as string)
 			};
 		}
 	};

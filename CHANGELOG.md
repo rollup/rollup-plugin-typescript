@@ -4,6 +4,7 @@
 
 ## 0.7.6
 * Ignore the `declaration` option ([#45](https://github.com/rollup/rollup-plugin-typescript/issues/45))
+* Disable `strictNullChecks` with a warning for TypeScript versions that don't support it ([#46](https://github.com/rollup/rollup-plugin-typescript/issues/46))
 
 ## 0.7.5
 * Ensure NPM doesn't ignore typescript-helpers
