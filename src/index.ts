@@ -7,15 +7,13 @@ import {
 	statSync,
 } from 'fs';
 import assign from 'object-assign';
-import compareVersions from 'compare-versions';
 
-import { endsWith } from './string';
-import fixExportClass from './fixExportClass';
+import { endsWith } from './string';
 
 interface Options {
 	tsconfig?: boolean;
-	include?: string | string[];
-	exclude?: string | string[];
+	include?: string | string[];
+	exclude?: string | string[];
 	typescript?: typeof ts;
 	module?: string;
 }
@@ -79,7 +77,7 @@ function compilerOptionsFromTsConfig( typescript: typeof ts ): ts.CompilerOption
 
 	const tsconfig = typescript.readConfigFile( findFile( cwd, 'tsconfig.json' ), path => readFileSync( path, 'utf8' ) );
 
-	if ( !tsconfig.config || !tsconfig.config.compilerOptions ) return {};
+	if ( !tsconfig.config || !tsconfig.config.compilerOptions ) return {};
 
 	return tsconfig.config.compilerOptions;
 }
@@ -95,13 +93,6 @@ function adjustCompilerOptions( typescript: typeof ts, options: any ) {
 	// Delete the `declaration` option to prevent compilation error.
 	// See: https://github.com/rollup/rollup-plugin-typescript/issues/45
 	delete options.declaration;
-
-	const tsVersion = typescript.version.split('-')[0];
-	if ( 'strictNullChecks' in options && compareVersions( tsVersion, '1.9.0' ) < 0 ) {
-		delete options.strictNullChecks;
-
-		console.warn( `rollup-plugin-typescript: 'strictNullChecks' is not supported; disabling it` );
-	}
 }
 
 export default function typescript ( options: Options ) {
@@ -109,18 +100,18 @@ export default function typescript ( options: Options ) {
 
 	const filter = createFilter(
 		options.include || [ '*.ts+(|x)', '**/*.ts+(|x)' ],
-		options.exclude || [ '*.d.ts', '**/*.d.ts' ] );
+		options.exclude || [ '*.d.ts', '**/*.d.ts' ] );
 
 	delete options.include;
 	delete options.exclude;
 
 	// Allow users to override the TypeScript version used for transpilation.
-	const typescript: typeof ts = options.typescript || ts;
+	const typescript: typeof ts = options.typescript || ts;
 
 	delete options.typescript;
 
 	// Load options from `tsconfig.json` unless explicitly asked not to.
-	const tsconfig = options.tsconfig === false ? {} :
+	const tsconfig = options.tsconfig === false ? {} :
 		compilerOptionsFromTsConfig( typescript );
 
 	delete options.tsconfig;
@@ -159,12 +150,7 @@ export default function typescript ( options: Options ) {
 
 			var result: ts.ResolvedModuleWithFailedLookupLocations;
 
-			if ( compareVersions( typescript.version, '1.8.0' ) < 0 ) {
-				// Suppress TypeScript warnings for function call.
-				result = (typescript as any).nodeModuleNameResolver( importee, importer, resolveHost );
-			} else {
-				result = typescript.nodeModuleNameResolver( importee, importer, compilerOptions, resolveHost );
-			}
+			result = typescript.nodeModuleNameResolver( importee, importer, compilerOptions, resolveHost );
 
 			if ( result.resolvedModule && result.resolvedModule.resolvedFileName ) {
 				if ( endsWith( result.resolvedModule.resolvedFileName, '.d.ts' ) ) {
@@ -180,7 +166,7 @@ export default function typescript ( options: Options ) {
 		transform ( code: string, id: string ): { code: string, map: any } {
 			if ( !filter( id ) ) return null;
 
-			const transformed = typescript.transpileModule( fixExportClass( code, id ), {
+			const transformed = typescript.transpileModule( code, {
 				fileName: id,
 				reportDiagnostics: true,
 				compilerOptions

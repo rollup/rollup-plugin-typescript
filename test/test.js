@@ -127,53 +127,6 @@ describe( 'rollup-plugin-typescript', function () {
 		});
 	});
 
-	describe( 'strictNullChecks', function () {
-		it( 'is enabled for versions >= 1.9.0', function () {
-			return bundle( 'sample/overriding-typescript/main.ts', {
-				tsconfig: false,
-				strictNullChecks: true,
-
-				typescript: fakeTypescript({
-					version: '1.9.0-fake',
-					transpileModule: function ( code, options ) {
-						assert.ok( options.compilerOptions.strictNullChecks,
-							'strictNullChecks should be passed through' );
-
-						return {
-							outputText: '',
-							diagnostics: [],
-							sourceMapText: JSON.stringify({ mappings: '' })
-						};
-					}
-				}),
-			});
-		});
-
-		it( 'is disabled with a warning < 1.9.0', function () {
-			var warning = '';
-
-			console.warn = function (msg) {
-				warning = msg;
-			};
-
-			return rollup.rollup({
-				entry: 'sample/overriding-typescript/main.ts',
-				plugins: [
-					typescript({
-						tsconfig: false,
-						strictNullChecks: true,
-
-						typescript: fakeTypescript({
-							version: '1.8.0-fake',
-						})
-					})
-				]
-			}).then( function () {
-				assert.notEqual( warning.indexOf( "'strictNullChecks' is not supported" ), -1 );
-			});
-		});
-	});
-
 	it( 'should not resolve .d.ts files', function () {
 		return bundle( 'sample/dts/main.ts' ).then( function ( bundle ) {
 			assert.deepEqual( bundle.imports, [ 'an-import' ] );

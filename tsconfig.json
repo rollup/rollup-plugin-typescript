@@ -12,7 +12,6 @@
     "node_modules"
   ],
   "files": [
-    "src/fixExportClass.ts",
     "src/index.ts",
     "src/string.ts",
     "test.ts",
