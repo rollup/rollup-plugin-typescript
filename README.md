@@ -51,7 +51,3 @@ typescript({
 
 ## Issues
 Emit-less types, see [#28](https://github.com/rollup/rollup-plugin-typescript/issues/28).
-
-## License
-
-MIT
