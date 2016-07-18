@@ -2,6 +2,9 @@
 
 ## master
 
+## 0.7.7
+* Add missing `__assign` helper ([#49](https://github.com/rollup/rollup-plugin-typescript/issues/49))
+
 ## 0.7.6
 * Ignore the `declaration` option ([#45](https://github.com/rollup/rollup-plugin-typescript/issues/45))
 * Disable `strictNullChecks` with a warning for TypeScript versions that don't support it ([#46](https://github.com/rollup/rollup-plugin-typescript/issues/46))
