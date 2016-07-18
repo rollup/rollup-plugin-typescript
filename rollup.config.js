@@ -5,6 +5,7 @@ export default {
 
 	external: [
 		'compare-versions',
+		'path',
 		'fs',
 		'object-assign',
 		'rollup-pluginutils',

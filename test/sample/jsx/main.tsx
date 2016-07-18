@@ -1,1 +1,1 @@
-export default <span>Yo!</span>
+export default <span {...props}>Yo!</span>

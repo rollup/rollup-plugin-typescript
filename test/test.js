@@ -100,28 +100,23 @@ describe( 'rollup-plugin-typescript', function () {
 	});
 
 	it( 'supports overriding the TypeScript version', function () {
-		return rollup.rollup({
-			entry: 'sample/overriding-typescript/main.ts',
-			plugins: [
-				typescript({
-					// Don't use `tsconfig.json`
-					tsconfig: false,
+		return bundle('sample/overriding-typescript/main.ts', {
+			// Don't use `tsconfig.json`
+			tsconfig: false,
 
-					// test with a mocked version of TypeScript
-					typescript: fakeTypescript({
-						version: '1.8.0-fake',
+			// test with a mocked version of TypeScript
+			typescript: fakeTypescript({
+				version: '1.8.0-fake',
 
-						transpileModule: function ( code ) {
-							// Ignore the code to transpile. Always return the same thing.
-							return {
-								outputText: 'export default 1337;',
-								diagnostics: [],
-								sourceMapText: JSON.stringify({ mappings: '' })
-							};
-						}
-					})
-				})
-			]
+				transpileModule: function ( code ) {
+					// Ignore the code to transpile. Always return the same thing.
+					return {
+						outputText: 'export default 1337;',
+						diagnostics: [],
+						sourceMapText: JSON.stringify({ mappings: '' })
+					};
+				}
+			})
 		}).then( function ( bundle ) {
 			assert.equal( evaluate( bundle ), 1337 );
 		});
@@ -184,7 +179,12 @@ describe( 'rollup-plugin-typescript', function () {
 		return bundle( 'sample/jsx/main.tsx', { jsx: 'react' }).then( function ( bundle ) {
 			const code = bundle.generate().code;
 
-			assert.ok( code.indexOf( 'React.createElement("span", null, "Yo!")' ) !== -1, code );
+			assert.notEqual( code.indexOf( 'const __assign = ' ), -1,
+				'should contain __assign definition' );
+
+			const usage = code.indexOf( 'React.createElement("span", __assign({}, props), "Yo!")' );
+
+			assert.notEqual( usage, -1, 'should contain usage' );
 		});
 	});
 

@@ -214,7 +214,7 @@ export default function typescript ( options: Options ) {
 			return {
 				// Always append an import for the helpers.
 				code: transformed.outputText +
-					`\nimport { __extends, __decorate, __metadata, __param, __awaiter } from 'typescript-helpers';`,
+					`\nimport { __assign, __awaiter, __extends, __decorate, __metadata, __param } from 'typescript-helpers';`,
 
 				// Rollup expects `map` to be an object so we must parse the string
 				map: JSON.parse(transformed.sourceMapText as string)
