@@ -11,34 +11,7 @@
   "exclude": [
     "node_modules"
   ],
-  "files": [
-    "src/fixExportClass.ts",
-    "src/index.ts",
-    "src/string.ts",
-    "test.ts",
-    "test/sample/async/main.ts",
-    "test/sample/basic/main.ts",
-    "test/sample/const-enums/enums.ts",
-    "test/sample/const-enums/main.ts",
-    "test/sample/dedup-helpers/A.ts",
-    "test/sample/dedup-helpers/B.ts",
-    "test/sample/dedup-helpers/Base.ts",
-    "test/sample/dedup-helpers/main.ts",
-    "test/sample/dts/main.ts",
-    "test/sample/dts/node_modules/an-import.d.ts",
-    "test/sample/export-abstract-class/main.ts",
-    "test/sample/export-class-fix/default.ts",
-    "test/sample/export-class-fix/main.ts",
-    "test/sample/export-class-fix/named.ts",
-    "test/sample/export-class/Foo.ts",
-    "test/sample/export-class/main.ts",
-    "test/sample/import-class/A.ts",
-    "test/sample/import-class/main.ts",
-    "test/sample/overriding-typescript/main.ts",
-    "test/sample/syntax-error/missing-type.ts",
-    "test/sample/jsx/main.tsx"
-  ],
   "atom": {
-    "rewriteTsconfig": true
+    "rewriteTsconfig": false
   }
 }

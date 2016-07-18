@@ -9,8 +9,8 @@ import {
 import assign from 'object-assign';
 import compareVersions from 'compare-versions';
 
-import { endsWith } from './string';
-import fixExportClass from './fixExportClass';
+import { endsWith } from './string.ts';
+import fixExportClass from './fixExportClass.ts';
 
 interface Options {
 	tsconfig?: boolean;
@@ -208,7 +208,7 @@ export default function typescript ( options: Options ) {
 			});
 
 			if ( fatalError ) {
-				throw new Error( `There were TypeScript errors transpiling "${id}"` );
+				throw new Error( `TypeScript errors` );
 			}
 
 			return {
