@@ -180,7 +180,17 @@ export default function typescript ( options: Options ) {
 		transform ( code: string, id: string ): { code: string, map: any } {
 			if ( !filter( id ) ) return null;
 
-			const transformed = typescript.transpileModule( fixExportClass( code, id ), {
+			// Check that target is lower than ES6
+			if ( compilerOptions.target === undefined || compilerOptions.target < typescript.ScriptTarget.ES2015 ) {
+
+				// Typescript 2.0 supports target = ES5 and module = ES2015
+				const tsVersion = typescript.version.split('-')[0];
+				if ( compareVersions( tsVersion, '2.0.0' ) < 0 ) {
+					code = fixExportClass( code, id );
+				}
+			}
+
+			const transformed = typescript.transpileModule( code, {
 				fileName: id,
 				reportDiagnostics: true,
 				compilerOptions
