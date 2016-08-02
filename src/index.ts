@@ -156,6 +156,10 @@ export default function typescript ( options: Options ) {
 			}
 
 			if ( !importer ) return null;
+			
+			if (path.sep !== "/") {
+				importer = importer.split(path.sep).join("/");
+			}
 
 			var result: ts.ResolvedModuleWithFailedLookupLocations;
 
