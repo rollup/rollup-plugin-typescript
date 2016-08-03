@@ -82,7 +82,7 @@ describe( 'rollup-plugin-typescript', function () {
 
 	it( 'reports diagnostics and throws if errors occur during transpilation', function () {
 		return bundle( 'sample/syntax-error/missing-type.ts' ).catch( function ( error ) {
-			assert.ok( error.message.indexOf( 'There were TypeScript errors' ) === 0, 'Should reject erroneous code.' );
+			assert.ok( error.message.search( 'Error transforming') === 0 && error.message.search('There were TypeScript errors.' ) > -1, 'Should reject erroneous code.' );
 		});
 	});
 

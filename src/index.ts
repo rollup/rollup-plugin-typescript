@@ -212,7 +212,7 @@ export default function typescript ( options: Options ) {
 			});
 
 			if ( fatalError ) {
-				throw new Error( `There were TypeScript errors transpiling "${id}"` );
+				throw new Error( `There were TypeScript errors.` );
 			}
 
 			return {
