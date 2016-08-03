@@ -3,6 +3,7 @@
   "version": "0.7.7",
   "description": "Seamless integration between Rollup and TypeScript.",
   "main": "dist/rollup-plugin-typescript.cjs.js",
+  "module": "dist/rollup-plugin-typescript.es6.js",
   "jsnext:main": "dist/rollup-plugin-typescript.es6.js",
   "files": [
     "dist",
@@ -37,7 +38,7 @@
     "mocha": "^2.3.3",
     "rimraf": "^2.5.4",
     "rollup": "^0.25.7",
-    "rollup-plugin-typescript": "^0.5.0"
+    "rollup-plugin-buble": "^0.12.1"
   },
   "repository": {
     "type": "git",
