@@ -156,6 +156,10 @@ export default function typescript ( options: Options ) {
 			}
 
 			if ( !importer ) return null;
+			
+			if (path.sep !== "/") {
+				importer = importer.split(path.sep).join("/");
+			}
 
 			var result: ts.ResolvedModuleWithFailedLookupLocations;
 
@@ -208,7 +212,7 @@ export default function typescript ( options: Options ) {
 			});
 
 			if ( fatalError ) {
-				throw new Error( `There were TypeScript errors transpiling "${id}"` );
+				throw new Error( `There were TypeScript errors.` );
 			}
 
 			return {
