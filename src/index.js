@@ -159,6 +159,8 @@ export default function typescript ( options ) {
 
 			var result;
 
+			importer = importer.split('\\').join('/');
+
 			if ( compareVersions( typescript.version, '1.8.0' ) < 0 ) {
 				// Suppress TypeScript warnings for function call.
 				result = typescript.nodeModuleNameResolver( importee, importer, resolveHost );
@@ -208,7 +210,7 @@ export default function typescript ( options ) {
 			});
 
 			if ( fatalError ) {
-				throw new Error( `There were TypeScript errors transpiling "${id}"` );
+				throw new Error( `There were TypeScript errors transpiling` );
 			}
 
 			return {
