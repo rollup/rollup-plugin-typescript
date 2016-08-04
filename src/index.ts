@@ -217,7 +217,7 @@ export default function typescript ( options: Options ) {
 					`\nimport { __assign, __awaiter, __extends, __decorate, __metadata, __param } from 'typescript-helpers';`,
 
 				// Rollup expects `map` to be an object so we must parse the string
-				map: JSON.parse(transformed.sourceMapText as string)
+				map: transformed.sourceMapText ? JSON.parse(transformed.sourceMapText as string) : null
 			};
 		}
 	};
