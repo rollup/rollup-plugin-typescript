@@ -201,6 +201,13 @@ describe( 'rollup-plugin-typescript', function () {
 			inlineSourceMap: true,
 		});
 	});
+
+	it ( 'should not fail if source maps are off', function () {
+		return bundle( 'sample/overriding-typescript/main.ts', {
+			inlineSourceMap: false,
+			sourceMap: false
+		});
+	});
 });
 
 function fakeTypescript( custom ) {
