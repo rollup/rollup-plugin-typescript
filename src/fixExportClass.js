@@ -31,13 +31,13 @@ import * as tippex from 'tippex';
 //     export { A };
 //
 // The solution is to replace the previous export syntax with the latter.
-export default function fix ( code: string, id: string ): string {
+export default function fix ( code, id ) {
 
 	// Erase comments, strings etc. to avoid erroneous matches for the Regex.
 	const cleanCode = getErasedCode( code, id );
 
 	const re = /export\s+(default\s+)?((?:abstract\s+)?class)(?:\s+(\w+))?/g;
-	let match: RegExpExecArray;
+	let match;
 
 	while ( match = re.exec( cleanCode ) ) {
 		// To keep source maps intact, replace non-whitespace characters with spaces.
@@ -61,7 +61,7 @@ export default function fix ( code: string, id: string ): string {
 	return code;
 }
 
-function getErasedCode ( code: string, id: string ): string {
+function getErasedCode ( code, id ) {
 	try {
 		return tippex.erase( code );
 	} catch (e) {
@@ -69,7 +69,7 @@ function getErasedCode ( code: string, id: string ): string {
 	}
 }
 
-function erase ( code: string, start: number, length: number ): string {
+function erase ( code, start, length ) {
 	const end = start + length;
 
 	return code.slice( 0, start ) +

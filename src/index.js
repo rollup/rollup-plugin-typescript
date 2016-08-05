@@ -11,7 +11,7 @@ import compareVersions from 'compare-versions';
 
 import { endsWith } from './string';
 import fixExportClass from './fixExportClass';
-
+/*
 interface Options {
 	tsconfig?: boolean;
 	include?: string | string[];
@@ -19,16 +19,16 @@ interface Options {
 	typescript?: typeof ts;
 	module?: string;
 }
-
+*/
 const resolveHost = {
-	directoryExists ( dirPath: string ): boolean {
+	directoryExists ( dirPath ) {
 		try {
 			return statSync( dirPath ).isDirectory();
 		} catch ( err ) {
 			return false;
 		}
 	},
-	fileExists ( filePath: string ): boolean {
+	fileExists ( filePath ) {
 		try {
 			return statSync( filePath ).isFile();
 		} catch ( err ) {
@@ -37,12 +37,12 @@ const resolveHost = {
 	}
 };
 
-function goodErrors ( diagnostic: ts.Diagnostic ): boolean {
+function goodErrors ( diagnostic ) {
 	// All errors except `Cannot compile modules into 'es6' when targeting 'ES5' or lower.`
 	return diagnostic.code !== 1204;
 }
 
-function getDefaultOptions(): any {
+function getDefaultOptions() {
 	return {
 		noEmitHelpers: true,
 		module: 'es2015',
@@ -53,7 +53,7 @@ function getDefaultOptions(): any {
 // Gratefully lifted from 'look-up', due to problems using it directly:
 //   https://github.com/jonschlinkert/look-up/blob/master/index.js
 //   MIT Licenced
-function findFile( cwd: string, filename: string ): string {
+function findFile( cwd, filename ) {
 	let fp = cwd ? ( cwd + '/' + filename ) : filename;
 
 	if ( existsSync( fp ) ) {
@@ -74,7 +74,7 @@ function findFile( cwd: string, filename: string ): string {
 	return null;
 }
 
-function compilerOptionsFromTsConfig( typescript: typeof ts ): ts.CompilerOptions {
+function compilerOptionsFromTsConfig( typescript ) {
 	const cwd = process.cwd();
 
 	const tsconfig = typescript.readConfigFile( findFile( cwd, 'tsconfig.json' ), path => readFileSync( path, 'utf8' ) );
@@ -84,7 +84,7 @@ function compilerOptionsFromTsConfig( typescript: typeof ts ): ts.CompilerOption
 	return tsconfig.config.compilerOptions;
 }
 
-function adjustCompilerOptions( typescript: typeof ts, options: any ) {
+function adjustCompilerOptions( typescript, options ) {
 	// Set `sourceMap` to `inlineSourceMap` if it's a boolean
 	// under the assumption that both are never specified simultaneously.
 	if ( typeof options.inlineSourceMap === 'boolean' ) {
@@ -104,7 +104,7 @@ function adjustCompilerOptions( typescript: typeof ts, options: any ) {
 	}
 }
 
-export default function typescript ( options: Options ) {
+export default function typescript ( options ) {
 	options = assign( {}, options || {} );
 
 	const filter = createFilter(
@@ -115,7 +115,7 @@ export default function typescript ( options: Options ) {
 	delete options.exclude;
 
 	// Allow users to override the TypeScript version used for transpilation.
-	const typescript: typeof ts = options.typescript || ts;
+	const typescript = options.typescript || ts;
 
 	delete options.typescript;
 
@@ -149,7 +149,7 @@ export default function typescript ( options: Options ) {
 	const compilerOptions = parsed.options;
 
 	return {
-		resolveId ( importee: string, importer: string ): string {
+		resolveId ( importee, importer ) {
 			// Handle the special `typescript-helpers` import itself.
 			if ( importee === 'typescript-helpers' ) {
 				return path.resolve( __dirname, '../src/typescript-helpers.js' );
@@ -157,11 +157,13 @@ export default function typescript ( options: Options ) {
 
 			if ( !importer ) return null;
 
-			var result: ts.ResolvedModuleWithFailedLookupLocations;
+			var result;
+
+			importer = importer.split('\\').join('/');
 
 			if ( compareVersions( typescript.version, '1.8.0' ) < 0 ) {
 				// Suppress TypeScript warnings for function call.
-				result = (typescript as any).nodeModuleNameResolver( importee, importer, resolveHost );
+				result = typescript.nodeModuleNameResolver( importee, importer, resolveHost );
 			} else {
 				result = typescript.nodeModuleNameResolver( importee, importer, compilerOptions, resolveHost );
 			}
@@ -177,7 +179,7 @@ export default function typescript ( options: Options ) {
 			return null;
 		},
 
-		transform ( code: string, id: string ): { code: string, map: any } {
+		transform ( code, id ) {
 			if ( !filter( id ) ) return null;
 
 			const transformed = typescript.transpileModule( fixExportClass( code, id ), {
@@ -208,7 +210,7 @@ export default function typescript ( options: Options ) {
 			});
 
 			if ( fatalError ) {
-				throw new Error( `There were TypeScript errors transpiling "${id}"` );
+				throw new Error( `There were TypeScript errors transpiling` );
 			}
 
 			return {
@@ -217,7 +219,7 @@ export default function typescript ( options: Options ) {
 					`\nimport { __assign, __awaiter, __extends, __decorate, __metadata, __param } from 'typescript-helpers';`,
 
 				// Rollup expects `map` to be an object so we must parse the string
-				map: JSON.parse(transformed.sourceMapText as string)
+				map: JSON.parse(transformed.sourceMapText)
 			};
 		}
 	};

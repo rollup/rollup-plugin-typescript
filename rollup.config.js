@@ -1,7 +1,7 @@
-import typescript from 'rollup-plugin-typescript';
+import buble from 'rollup-plugin-buble';
 
 export default {
-	entry: 'src/index.ts',
+	entry: 'src/index.js',
 
 	external: [
 		'compare-versions',
@@ -14,6 +14,6 @@ export default {
 	],
 
 	plugins: [
-		typescript()
+		buble()
 	]
 };

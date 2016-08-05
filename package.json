@@ -3,7 +3,8 @@
   "version": "0.7.7",
   "description": "Seamless integration between Rollup and TypeScript.",
   "main": "dist/rollup-plugin-typescript.cjs.js",
-  "jsnext:main": "dist/rollup-plugin-typescript.es6.js",
+  "module": "dist/rollup-plugin-typescript.es.js",
+  "jsnext:main": "dist/rollup-plugin-typescript.es.js",
   "files": [
     "dist",
     "src",
@@ -22,8 +23,8 @@
     "prepublish": "npm run test",
     "pretest": "npm run build",
     "build:cjs": "rollup -c -f cjs -o dist/rollup-plugin-typescript.cjs.js",
-    "build:es6": "rollup -c -o dist/rollup-plugin-typescript.es6.js",
-    "build": "npm run build:cjs && npm run build:es6",
+    "build:es": "rollup -c -o dist/rollup-plugin-typescript.es.js",
+    "build": "npm run build:cjs && npm run build:es",
     "prebuild": "rimraf dist/*"
   },
   "dependencies": {
@@ -34,10 +35,10 @@
     "typescript": "^1.8.9"
   },
   "devDependencies": {
-    "mocha": "^2.3.3",
+    "mocha": "^3.0.0",
     "rimraf": "^2.5.4",
-    "rollup": "^0.25.7",
-    "rollup-plugin-typescript": "^0.5.0"
+    "rollup": "^0.34.3",
+    "rollup-plugin-buble": "^0.12.1"
   },
   "repository": {
     "type": "git",
