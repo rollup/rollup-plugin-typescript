@@ -208,6 +208,24 @@ describe( 'rollup-plugin-typescript', function () {
 			sourceMap: false
 		});
 	});
+	
+	it( 'does not include helpers in source maps', function () {
+		return bundle( 'sample/dedup-helpers/main.ts', {
+			sourceMap: true
+		}).then( function ( bundle ) {
+			const result = bundle.generate({
+				sourceMap: true
+			});
+			
+			const sources = result.map.sources;     
+			
+			function isNotHelper( path ) {
+				return path.indexOf( 'typescript-helpers' ) === -1;
+			}
+			
+			assert.ok( sources.every( isNotHelper ), sources );
+		});
+	});
 });
 
 function fakeTypescript( custom ) {
