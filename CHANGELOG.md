@@ -1,6 +1,9 @@
 # rollup-plugin-typescript changelog
 
-## master
+## 0.8.0
+
+* Fix the rollup breaking change with paths ([#52](https://github.com/rollup/rollup-plugin-typescript/issues/52))
+* Don't fail without source maps ([#57](https://github.com/rollup/rollup-plugin-typescript/pull/57))
 
 ## 0.7.7
 * Add missing `__assign` helper ([#49](https://github.com/rollup/rollup-plugin-typescript/issues/49))
