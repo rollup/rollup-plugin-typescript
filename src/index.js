@@ -77,7 +77,7 @@ export default function typescript ( options ) {
 
 			if ( !importer ) return null;
 
-			var result;
+			let result;
 
 			importer = importer.split('\\').join('/');
 
@@ -104,7 +104,7 @@ export default function typescript ( options ) {
 				return helpersSource;
 			}
 		},
-		
+
 		transform ( code, id ) {
 			if ( !filter( id ) ) return null;
 
@@ -121,7 +121,7 @@ export default function typescript ( options ) {
 			let fatalError = false;
 
 			diagnostics.forEach( diagnostic => {
-				var message = typescript.flattenDiagnosticMessageText(diagnostic.messageText, '\n');
+				const message = typescript.flattenDiagnosticMessageText(diagnostic.messageText, '\n');
 
 				if ( diagnostic.file ) {
 					const { line, character } = diagnostic.file.getLineAndCharacterOfPosition( diagnostic.start );

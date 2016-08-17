@@ -1,5 +1,9 @@
 # rollup-plugin-typescript changelog
 
+## 0.8.1
+
+* Ignore typescript-helpers in source maps ([#61](https://github.com/rollup/rollup-plugin-typescript/issues/61))
+
 ## 0.8.0
 
 * Fix the rollup breaking change with paths ([#52](https://github.com/rollup/rollup-plugin-typescript/issues/52))

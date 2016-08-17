@@ -1,14 +1,13 @@
 {
   "name": "rollup-plugin-typescript",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "description": "Seamless integration between Rollup and TypeScript.",
   "main": "dist/rollup-plugin-typescript.cjs.js",
   "module": "dist/rollup-plugin-typescript.es.js",
   "jsnext:main": "dist/rollup-plugin-typescript.es.js",
   "files": [
     "dist",
-    "src",
-    "README"
+    "src"
   ],
   "keywords": [
     "rollup-plugin",
@@ -19,13 +18,13 @@
   "homepage": "https://github.com/rollup/rollup-plugin-typescript",
   "author": "Oskar Segersvärd",
   "scripts": {
-    "test": "mocha --harmony",
-    "prepublish": "npm run test",
+    "prebuild": "rimraf dist/*",
+    "build": "rollup -c",
+    "lint": "eslint src test/*.js",
     "pretest": "npm run build",
-    "build:cjs": "rollup -c -f cjs -o dist/rollup-plugin-typescript.cjs.js",
-    "build:es": "rollup -c -o dist/rollup-plugin-typescript.es.js",
-    "build": "npm run build:cjs && npm run build:es",
-    "prebuild": "rimraf dist/*"
+    "test": "mocha --compilers js:buble/register",
+    "posttest": "npm run lint",
+    "prepublish": "npm run test"
   },
   "dependencies": {
     "compare-versions": "2.0.1",
@@ -35,10 +34,12 @@
     "typescript": "^1.8.9"
   },
   "devDependencies": {
+    "buble": "^0.13.1",
+    "eslint": "^2.13.1",
     "mocha": "^3.0.0",
     "rimraf": "^2.5.4",
     "rollup": "^0.34.3",
-    "rollup-plugin-buble": "^0.12.1"
+    "rollup-plugin-buble": "^0.13.0"
   },
   "repository": {
     "type": "git",

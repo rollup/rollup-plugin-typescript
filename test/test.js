@@ -1,21 +1,21 @@
-var assert = require( 'assert' );
-var rollup = require( 'rollup' );
-var assign = require( 'object-assign' );
-var typescript = require( '..' );
+const assert = require( 'assert' );
+const rollup = require( 'rollup' );
+const assign = require( 'object-assign' );
+const typescript = require( '..' );
 
 process.chdir( __dirname );
 
 // Evaluate a bundle (as CommonJS) and return its exports.
-function evaluate( bundle ) {
+function evaluate ( bundle ) {
 	const module = { exports: {} };
 
-	new Function( 'module', 'exports', bundle.generate({ format: 'cjs' }).code )(module, module.exports);
+	new Function( 'module', 'exports', bundle.generate({ format: 'cjs' }).code )( module, module.exports );
 
 	return module.exports;
 }
 
 // Short-hand for rollup using the typescript plugin.
-function bundle( main, options ) {
+function bundle ( main, options ) {
 	return rollup.rollup({
 		entry: main,
 		plugins: [ typescript( options ) ]
@@ -25,8 +25,8 @@ function bundle( main, options ) {
 describe( 'rollup-plugin-typescript', function () {
 	this.timeout( 5000 );
 
-	it( 'runs code through typescript', function () {
-		return bundle( 'sample/basic/main.ts' ).then( function ( bundle ) {
+	it( 'runs code through typescript', () => {
+		return bundle( 'sample/basic/main.ts' ).then( bundle => {
 			const code = bundle.generate().code;
 
 			assert.ok( code.indexOf( 'number' ) === -1, code );
@@ -34,21 +34,21 @@ describe( 'rollup-plugin-typescript', function () {
 		});
 	});
 
-	it( 'ignores the declaration option', function () {
+	it( 'ignores the declaration option', () => {
 		return bundle( 'sample/basic/main.ts', { declaration: true });
 	});
 
-	it( 'handles async functions', function () {
+	it( 'handles async functions', () => {
 		return bundle( 'sample/async/main.ts' )
-			.then( function ( bundle ) {
+			.then( bundle => {
 				const wait = evaluate( bundle );
 
 				return wait( 3 );
 			});
 	});
 
-	it( 'does not duplicate helpers', function () {
-		return bundle( 'sample/dedup-helpers/main.ts' ).then( function ( bundle ) {
+	it( 'does not duplicate helpers', () => {
+		return bundle( 'sample/dedup-helpers/main.ts' ).then( bundle => {
 			const code = bundle.generate().code;
 
 			// The `__extends` function is defined in the bundle.
@@ -59,8 +59,8 @@ describe( 'rollup-plugin-typescript', function () {
 		});
 	});
 
-	it( 'transpiles `export class A` correctly', function () {
-		return bundle( 'sample/export-class-fix/main.ts' ).then( function ( bundle ) {
+	it( 'transpiles `export class A` correctly', () => {
+		return bundle( 'sample/export-class-fix/main.ts' ).then( bundle => {
 			const code = bundle.generate().code;
 
 			assert.equal( code.indexOf( 'class' ), -1, code );
@@ -70,8 +70,8 @@ describe( 'rollup-plugin-typescript', function () {
 		});
 	});
 
-	it( 'transpiles ES6 features to ES5 with source maps', function () {
-		return bundle( 'sample/import-class/main.ts' ).then( function ( bundle ) {
+	it( 'transpiles ES6 features to ES5 with source maps', () => {
+		return bundle( 'sample/import-class/main.ts' ).then( bundle => {
 			const code = bundle.generate().code;
 
 			assert.equal( code.indexOf( 'class' ), -1, code );
@@ -80,26 +80,26 @@ describe( 'rollup-plugin-typescript', function () {
 		});
 	});
 
-	it( 'reports diagnostics and throws if errors occur during transpilation', function () {
-		return bundle( 'sample/syntax-error/missing-type.ts' ).catch( function ( error ) {
+	it( 'reports diagnostics and throws if errors occur during transpilation', () => {
+		return bundle( 'sample/syntax-error/missing-type.ts' ).catch( error => {
 			assert.ok( error.message.indexOf( 'There were TypeScript errors transpiling' ) !== -1, 'Should reject erroneous code.' );
 		});
 	});
 
-	it( 'works with named exports for abstract classes', function () {
-		return bundle( 'sample/export-abstract-class/main.ts' ).then(function ( bundle ) {
+	it( 'works with named exports for abstract classes', () => {
+		return bundle( 'sample/export-abstract-class/main.ts' ).then(bundle => {
 			const code = bundle.generate().code;
 			assert.ok( code.length > 0, code );
 		});
 	});
 
-	it( 'should use named exports for classes', function () {
-		return bundle( 'sample/export-class/main.ts' ).then( function ( bundle ) {
+	it( 'should use named exports for classes', () => {
+		return bundle( 'sample/export-class/main.ts' ).then( bundle => {
 			assert.equal( evaluate( bundle ).foo, 'bar' );
 		});
 	});
 
-	it( 'supports overriding the TypeScript version', function () {
+	it( 'supports overriding the TypeScript version', () => {
 		return bundle('sample/overriding-typescript/main.ts', {
 			// Don't use `tsconfig.json`
 			tsconfig: false,
@@ -108,7 +108,7 @@ describe( 'rollup-plugin-typescript', function () {
 			typescript: fakeTypescript({
 				version: '1.8.0-fake',
 
-				transpileModule: function ( code ) {
+				transpileModule: () => {
 					// Ignore the code to transpile. Always return the same thing.
 					return {
 						outputText: 'export default 1337;',
@@ -117,20 +117,20 @@ describe( 'rollup-plugin-typescript', function () {
 					};
 				}
 			})
-		}).then( function ( bundle ) {
+		}).then( bundle => {
 			assert.equal( evaluate( bundle ), 1337 );
 		});
 	});
 
-	describe( 'strictNullChecks', function () {
-		it( 'is enabled for versions >= 1.9.0', function () {
+	describe( 'strictNullChecks', () => {
+		it( 'is enabled for versions >= 1.9.0', () => {
 			return bundle( 'sample/overriding-typescript/main.ts', {
 				tsconfig: false,
 				strictNullChecks: true,
 
 				typescript: fakeTypescript({
 					version: '1.9.0-fake',
-					transpileModule: function ( code, options ) {
+					transpileModule ( code, options ) {
 						assert.ok( options.compilerOptions.strictNullChecks,
 							'strictNullChecks should be passed through' );
 
@@ -140,12 +140,12 @@ describe( 'rollup-plugin-typescript', function () {
 							sourceMapText: JSON.stringify({ mappings: '' })
 						};
 					}
-				}),
+				})
 			});
 		});
 
-		it( 'is disabled with a warning < 1.9.0', function () {
-			var warning = '';
+		it( 'is disabled with a warning < 1.9.0', () => {
+			let warning = '';
 
 			console.warn = function (msg) {
 				warning = msg;
@@ -159,24 +159,24 @@ describe( 'rollup-plugin-typescript', function () {
 						strictNullChecks: true,
 
 						typescript: fakeTypescript({
-							version: '1.8.0-fake',
+							version: '1.8.0-fake'
 						})
 					})
 				]
-			}).then( function () {
+			}).then( () => {
 				assert.notEqual( warning.indexOf( "'strictNullChecks' is not supported" ), -1 );
 			});
 		});
 	});
 
-	it( 'should not resolve .d.ts files', function () {
-		return bundle( 'sample/dts/main.ts' ).then( function ( bundle ) {
+	it( 'should not resolve .d.ts files', () => {
+		return bundle( 'sample/dts/main.ts' ).then( bundle => {
 			assert.deepEqual( bundle.imports, [ 'an-import' ] );
 		});
 	});
 
-	it( 'should transpile JSX if enabled', function () {
-		return bundle( 'sample/jsx/main.tsx', { jsx: 'react' }).then( function ( bundle ) {
+	it( 'should transpile JSX if enabled', () => {
+		return bundle( 'sample/jsx/main.tsx', { jsx: 'react' }).then( bundle => {
 			const code = bundle.generate().code;
 
 			assert.notEqual( code.indexOf( 'const __assign = ' ), -1,
@@ -188,49 +188,43 @@ describe( 'rollup-plugin-typescript', function () {
 		});
 	});
 
-	it( 'should throw on bad options', function () {
-		assert.throws( function () {
+	it( 'should throw on bad options', () => {
+		assert.throws( () => {
 			bundle( 'does-not-matter.ts', {
 				foo: 'bar'
 			});
 		}, /Couldn't process compiler options/ );
 	});
 
-	it( 'prevents errors due to conflicting `sourceMap`/`inlineSourceMap` options', function () {
+	it( 'prevents errors due to conflicting `sourceMap`/`inlineSourceMap` options', () => {
 		return bundle( 'sample/overriding-typescript/main.ts', {
-			inlineSourceMap: true,
+			inlineSourceMap: true
 		});
 	});
 
-	it ( 'should not fail if source maps are off', function () {
+	it ( 'should not fail if source maps are off', () => {
 		return bundle( 'sample/overriding-typescript/main.ts', {
 			inlineSourceMap: false,
 			sourceMap: false
 		});
 	});
-	
-	it( 'does not include helpers in source maps', function () {
+
+	it( 'does not include helpers in source maps', () => {
 		return bundle( 'sample/dedup-helpers/main.ts', {
 			sourceMap: true
-		}).then( function ( bundle ) {
-			const result = bundle.generate({
+		}).then( bundle => {
+			const { map } = bundle.generate({
 				sourceMap: true
 			});
-			
-			const sources = result.map.sources;     
-			
-			function isNotHelper( path ) {
-				return path.indexOf( 'typescript-helpers' ) === -1;
-			}
-			
-			assert.ok( sources.every( isNotHelper ), sources );
+
+			assert.ok( map.sources.every( source => source.indexOf( 'typescript-helpers' ) === -1) );
 		});
 	});
 });
 
-function fakeTypescript( custom ) {
+function fakeTypescript ( custom ) {
 	return assign({
-		transpileModule: function ( code, options ) {
+		transpileModule () {
 			return {
 				outputText: '',
 				diagnostics: [],
@@ -238,20 +232,20 @@ function fakeTypescript( custom ) {
 			};
 		},
 
-		convertCompilerOptionsFromJson: function ( options ) {
+		convertCompilerOptionsFromJson ( options ) {
 			[
 				'include',
 				'exclude',
 				'typescript',
-				'tsconfig',
-			].forEach( function ( option ) {
+				'tsconfig'
+			].forEach( option => {
 				if ( option in options ) {
 					throw new Error( 'unrecognized compiler option "' + option + '"' );
 				}
 			});
 
 			return {
-				options: options,
+				options,
 				errors: []
 			};
 		}

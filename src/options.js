@@ -5,7 +5,7 @@ import {
 	readFileSync
 } from 'fs';
 
-export function getDefaultOptions() {
+export function getDefaultOptions () {
 	return {
 		noEmitHelpers: true,
 		module: 'es2015',
@@ -16,7 +16,7 @@ export function getDefaultOptions() {
 // Gratefully lifted from 'look-up', due to problems using it directly:
 //   https://github.com/jonschlinkert/look-up/blob/master/index.js
 //   MIT Licenced
-function findFile( cwd, filename ) {
+function findFile ( cwd, filename ) {
 	let fp = cwd ? ( cwd + '/' + filename ) : filename;
 
 	if ( existsSync( fp ) ) {
@@ -37,7 +37,7 @@ function findFile( cwd, filename ) {
 	return null;
 }
 
-export function compilerOptionsFromTsConfig( typescript ) {
+export function compilerOptionsFromTsConfig ( typescript ) {
 	const cwd = process.cwd();
 
 	const tsconfig = typescript.readConfigFile( findFile( cwd, 'tsconfig.json' ), path => readFileSync( path, 'utf8' ) );
@@ -47,7 +47,7 @@ export function compilerOptionsFromTsConfig( typescript ) {
 	return tsconfig.config.compilerOptions;
 }
 
-export function adjustCompilerOptions( typescript, options ) {
+export function adjustCompilerOptions ( typescript, options ) {
 	// Set `sourceMap` to `inlineSourceMap` if it's a boolean
 	// under the assumption that both are never specified simultaneously.
 	if ( typeof options.inlineSourceMap === 'boolean' ) {

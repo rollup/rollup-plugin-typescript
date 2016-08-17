@@ -55,7 +55,7 @@ export default function fix ( code, id ) {
 		}
 
 		// To keep source maps intact, append the injected exports last.
-		code += `\nexport { ${ name } };`
+		code += `\nexport { ${ name } };`;
 	}
 
 	return code;
