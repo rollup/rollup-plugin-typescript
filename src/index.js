@@ -1,6 +1,7 @@
 import * as ts from 'typescript';
 import { createFilter } from 'rollup-pluginutils';
 import * as path from 'path';
+import * as fs from 'fs';
 import assign from 'object-assign';
 import compareVersions from 'compare-versions';
 
@@ -18,6 +19,10 @@ interface Options {
 	module?: string;
 }
 */
+
+// The injected id for helpers. Intentially invalid to prevent helpers being included in source maps.
+const helpersId = '\0typescript-helpers';
+const helpersSource = fs.readFileSync( path.resolve( __dirname, '../src/typescript-helpers.js' ), 'utf-8' );
 
 export default function typescript ( options ) {
 	options = assign( {}, options || {} );
@@ -66,8 +71,8 @@ export default function typescript ( options ) {
 	return {
 		resolveId ( importee, importer ) {
 			// Handle the special `typescript-helpers` import itself.
-			if ( importee === 'typescript-helpers' ) {
-				return path.resolve( __dirname, '../src/typescript-helpers.js' );
+			if ( importee === helpersId ) {
+				return helpersId;
 			}
 
 			if ( !importer ) return null;
@@ -94,6 +99,12 @@ export default function typescript ( options ) {
 			return null;
 		},
 
+		load ( id ) {
+			if ( id === helpersId ) {
+				return helpersSource;
+			}
+		},
+		
 		transform ( code, id ) {
 			if ( !filter( id ) ) return null;
 
@@ -132,7 +143,7 @@ export default function typescript ( options ) {
 			return {
 				// Always append an import for the helpers.
 				code: transformed.outputText +
-					`\nimport { __assign, __awaiter, __extends, __decorate, __metadata, __param } from 'typescript-helpers';`,
+					`\nimport { __assign, __awaiter, __extends, __decorate, __metadata, __param } from '${helpersId}';`,
 
 				// Rollup expects `map` to be an object so we must parse the string
 				map: transformed.sourceMapText ? JSON.parse(transformed.sourceMapText) : null
