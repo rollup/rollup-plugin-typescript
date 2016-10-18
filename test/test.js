@@ -220,6 +220,14 @@ describe( 'rollup-plugin-typescript', function () {
 			assert.ok( map.sources.every( source => source.indexOf( 'typescript-helpers' ) === -1) );
 		});
 	});
+
+	it( 'reads in custom tsconfig files', () => {
+		return bundle('sample/custom-tsconfig/main.ts', {
+			tsconfig: 'sample/custom-tsconfig/tsconfig.json'
+		}).then(bundle => {
+			assert.equal(bundle.modules[1].code.indexOf('const answer = 42'), 0);
+		});
+	});
 });
 
 function fakeTypescript ( custom ) {
