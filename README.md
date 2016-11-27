@@ -1,5 +1,5 @@
 # rollup-plugin-typescript
-![travis-ci](https://travis-ci.org/rollup/rollup-plugin-typescript.svg?branch=master)
+[![Build Status](https://travis-ci.org/rollup/rollup-plugin-typescript.svg?branch=master)](https://travis-ci.org/rollup/rollup-plugin-typescript)
 ![npm-version](https://img.shields.io/npm/v/rollup-plugin-typescript.svg?maxAge=2592000)
 ![npm-monthly-downloads](https://img.shields.io/npm/dm/rollup-plugin-typescript.svg?maxAge=2592000)
 ![npm-dependencies](https://img.shields.io/david/rollup/rollup-plugin-typescript.svg?maxAge=2592000)
