@@ -12,7 +12,7 @@ See [rollup-plugin-babel](https://github.com/rollup/rollup-plugin-babel).
 ## Installation
 
 ```bash
-npm install --save-dev rollup-plugin-typescript
+npm install --save-dev rollup-plugin-typescript typescript
 ```
 
 ## Usage
