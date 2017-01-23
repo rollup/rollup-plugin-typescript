@@ -9,6 +9,7 @@ import { endsWith } from './string';
 import { getDefaultOptions, compilerOptionsFromTsConfig, adjustCompilerOptions } from './options.js';
 import fixExportClass from './fixExportClass';
 import resolveHost from './resolveHost';
+import compiler from './compiler';
 
 /*
 interface Options {
@@ -45,6 +46,9 @@ export default function typescript ( options ) {
 
 	delete options.tsconfig;
 
+	const useLanguageService = options.useLanguageService;
+	delete options.useLanguageService;
+
 	// Since the CompilerOptions aren't designed for the Rollup
 	// use case, we'll adjust them for use with Rollup.
 	adjustCompilerOptions( typescript, tsconfig );
@@ -68,7 +72,14 @@ export default function typescript ( options ) {
 
 	const compilerOptions = parsed.options;
 
+	let isFirstRun = true;
+
 	return {
+		options (opts) {
+			const entryFile = path.resolve(process.cwd(), opts.entry);
+            compiler.init(typescript, compilerOptions, entryFile, useLanguageService);
+		},
+
 		resolveId ( importee, importer ) {
 			// Handle the special `typescript-helpers` import itself.
 			if ( importee === helpersId ) {
@@ -108,11 +119,7 @@ export default function typescript ( options ) {
 		transform ( code, id ) {
 			if ( !filter( id ) ) return null;
 
-			const transformed = typescript.transpileModule( fixExportClass( code, id ), {
-				fileName: id,
-				reportDiagnostics: true,
-				compilerOptions
-			});
+			const transformed = compiler.compileFile(id, fixExportClass( code, id ), !isFirstRun);
 
 			// All errors except `Cannot compile modules into 'es6' when targeting 'ES5' or lower.`
 			const diagnostics = transformed.diagnostics ?
@@ -136,7 +143,7 @@ export default function typescript ( options ) {
 				}
 			});
 
-			if ( fatalError ) {
+			if ( fatalError && isFirstRun ) {
 				throw new Error( `There were TypeScript errors transpiling` );
 			}
 
@@ -148,6 +155,10 @@ export default function typescript ( options ) {
 				// Rollup expects `map` to be an object so we must parse the string
 				map: transformed.sourceMapText ? JSON.parse(transformed.sourceMapText) : null
 			};
+		},
+
+		onwrite() {
+			isFirstRun = false;
 		}
 	};
 }
