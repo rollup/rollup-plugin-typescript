@@ -179,7 +179,7 @@ describe( 'rollup-plugin-typescript', function () {
 		return bundle( 'sample/jsx/main.tsx', { jsx: 'react' }).then( bundle => {
 			const code = bundle.generate().code;
 
-			assert.notEqual( code.indexOf( 'const __assign = ' ), -1,
+			assert.notEqual( code.indexOf( 'var __assign = ' ), -1,
 				'should contain __assign definition' );
 
 			const usage = code.indexOf( 'React.createElement("span", __assign({}, props), "Yo!")' );
