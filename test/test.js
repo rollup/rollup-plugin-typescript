@@ -39,7 +39,7 @@ describe( 'rollup-plugin-typescript', function () {
 	});
 
 	it( 'handles async functions', () => {
-		return bundle( 'sample/async/main.ts' )
+		return bundle( 'sample/async/main.ts', { noEmitHelpers: false })
 			.then( bundle => {
 				const wait = evaluate( bundle );
 
