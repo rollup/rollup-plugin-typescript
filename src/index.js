@@ -9,7 +9,7 @@ import { endsWith } from './string';
 import { getDefaultOptions, compilerOptionsFromTsConfig, adjustCompilerOptions } from './options.js';
 import fixExportClass from './fixExportClass';
 import resolveHost from './resolveHost';
-import compiler from './compiler';
+import createCompiler from './compiler';
 
 /*
 interface Options {
@@ -30,7 +30,7 @@ export default function typescript ( options ) {
 
 	const filter = createFilter(
 		options.include || [ '*.ts+(|x)', '**/*.ts+(|x)' ],
-		options.exclude || [ '*.d.ts', '**/*.d.ts' ] );
+		options.exclude || [] ); //|| [ '*.d.ts', '**/*.d.ts' ] );
 
 	delete options.include;
 	delete options.exclude;
@@ -82,10 +82,12 @@ export default function typescript ( options ) {
 	const isVersionOne = compareVersions( typescript.version, '2.0.0' ) >= 0;
 	let isFirstRun = true;
 
+	let compiler;
+
 	return {
 		options (opts) {
 			const entryFile = path.resolve(process.cwd(), opts.entry);
-			compiler.init(typescript, compilerOptions, entryFile, useLanguageService);
+			compiler = createCompiler( typescript, compilerOptions, entryFile, useLanguageService );
 		},
 
 		resolveId ( importee, importer ) {
@@ -131,7 +133,7 @@ export default function typescript ( options ) {
 				code = fixExportClass( code, id );
 			}
 
-			const transformed = compiler.compileFile( id, code, !isFirstRun, useLanguageService );
+			const transformed = compiler.compileFile( id, code, !isFirstRun );
 
 			// All errors except `Cannot compile modules into 'es6' when targeting 'ES5' or lower.`
 			const diagnostics = transformed.diagnostics ?
