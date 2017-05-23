@@ -258,6 +258,12 @@ describe( 'rollup-plugin-typescript', function () {
 			assert.equal(bundle.modules[1].code.indexOf('const val = 42'), 0);
 		});
 	});
+
+	it( 'automatically includes .d.ts files', () => {
+		return bundle( path.join( __dirname, 'sample/includes-definitions/main.ts' ) ).then(bundle => {
+			assert.ok(bundle.generate().code.length > 0, 'code is generated');
+		});
+	});
 });
 
 function fakeTypescript ( custom ) {

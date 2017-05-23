@@ -30,7 +30,7 @@ export default function typescript ( options ) {
 
 	const filter = createFilter(
 		options.include || [ '*.ts+(|x)', '**/*.ts+(|x)' ],
-		options.exclude || [] ); //|| [ '*.d.ts', '**/*.d.ts' ] );
+		options.exclude || [ '*.d.ts', '**/*.d.ts' ] );
 
 	delete options.include;
 	delete options.exclude;
@@ -88,6 +88,25 @@ export default function typescript ( options ) {
 		options (opts) {
 			const entryFile = path.resolve(process.cwd(), opts.entry);
 			compiler = createCompiler( typescript, compilerOptions, entryFile, useLanguageService );
+
+			const definitionsFilter = createFilter(
+				[ '*.d.ts', '**/*.d.ts' ],
+				[ 'node_modules/**' ] );
+
+			function read (dir, parent) {
+				dir.forEach(file => {
+					file = path.join(parent, file);
+					const stats = fs.statSync(file);
+					if (stats.isFile() && file.indexOf('.d.ts') > -1) {
+						if (definitionsFilter(file)) {
+							compiler.compileFile(file, fs.readFileSync(file, 'utf8'), false);
+						}
+					} else if (stats.isDirectory()) {
+						read(fs.readdirSync(file), file);
+					}
+				});
+			}
+			read(fs.readdirSync(process.cwd()), process.cwd());
 		},
 
 		resolveId ( importee, importer ) {

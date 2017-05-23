@@ -1,0 +1,1 @@
+new SomeClass(0);
