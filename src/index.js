@@ -50,7 +50,7 @@ export default function typescript ( options ) {
 
 	delete options.tsconfig;
 
-	const useLanguageService = options.useLanguageService;
+	const useLanguageService = options.useLanguageService !== false;
 	delete options.useLanguageService;
 
 	// Since the CompilerOptions aren't designed for the Rollup
@@ -82,7 +82,7 @@ export default function typescript ( options ) {
 	return {
 		options (opts) {
 			const entryFile = path.resolve(process.cwd(), opts.entry);
-            compiler.init(typescript, compilerOptions, entryFile, useLanguageService);
+			compiler.init(typescript, compilerOptions, entryFile, useLanguageService);
 		},
 
 		resolveId ( importee, importer ) {
@@ -167,7 +167,7 @@ export default function typescript ( options ) {
 			};
 		},
 
-		onwrite() {
+		onwrite () {
 			isFirstRun = false;
 		}
 	};
