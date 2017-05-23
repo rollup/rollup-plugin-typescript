@@ -1,2 +1,2 @@
-const answer: number = 42;
-console.log( `the answer is ${answer}` );
+const val: number = 42;
+console.log( `the answer is ${val}` );

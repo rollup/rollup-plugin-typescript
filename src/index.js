@@ -131,7 +131,7 @@ export default function typescript ( options ) {
 				code = fixExportClass( code, id );
 			}
 
-			const transformed = compiler.compileFile( id, code, !isFirstRun );
+			const transformed = compiler.compileFile( id, code, !isFirstRun, useLanguageService );
 
 			// All errors except `Cannot compile modules into 'es6' when targeting 'ES5' or lower.`
 			const diagnostics = transformed.diagnostics ?

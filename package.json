@@ -35,6 +35,7 @@
     "typescript": "^2.3.3"
   },
   "devDependencies": {
+    "@types/react": "^15.0.24",
     "buble": "^0.13.1",
     "eslint": "^2.13.1",
     "mocha": "^3.0.0",

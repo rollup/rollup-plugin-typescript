@@ -1,3 +1,3 @@
-import {Foo} from './Foo.ts';
+import {Foo} from './Foo';
 
 export default new Foo();

@@ -127,8 +127,8 @@ function init ( ts, compilerOpts, entry, useLanguageService ) {
 	}
 }
 
-function compileFile ( fileName, content, refreshFile ) {
-	return languageService
+function compileFile ( fileName, content, refreshFile, useLanguageService ) {
+	return useLanguageService
 		? compileUsingLanguageService( fileName, content, refreshFile )
 		: compileUsingSimpleApi( fileName, content );
 }
