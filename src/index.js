@@ -68,10 +68,12 @@ export default function typescript ( options ) {
 
 	const compilerOptions = parsed.options;
 
+	const isVersionOne = compareVersions( typescript.version, '2.0.0' ) >= 0;
+
 	return {
 		resolveId ( importee, importer ) {
 			// Handle the special `typescript-helpers` import itself.
-			if ( importee === helpersId ) {
+			if ( isVersionOne && importee === helpersId ) {
 				return helpersId;
 			}
 
@@ -100,7 +102,7 @@ export default function typescript ( options ) {
 		},
 
 		load ( id ) {
-			if ( id === helpersId ) {
+			if ( isVersionOne && id === helpersId ) {
 				return helpersSource;
 			}
 		},
@@ -140,10 +142,15 @@ export default function typescript ( options ) {
 				throw new Error( `There were TypeScript errors transpiling` );
 			}
 
+			let finalCode = transformed.outputText;
+
+			if (isVersionOne) {
+				// Always append an import for the helpers (for versions < 2)
+				finalCode += `\nimport { __assign, __awaiter, __extends, __decorate, __metadata, __param } from '${helpersId}';`;
+			}
+
 			return {
-				// Always append an import for the helpers.
-				code: transformed.outputText +
-					`\nimport { __assign, __awaiter, __extends, __decorate, __metadata, __param } from '${helpersId}';`,
+				code: finalCode,
 
 				// Rollup expects `map` to be an object so we must parse the string
 				map: transformed.sourceMapText ? JSON.parse(transformed.sourceMapText) : null

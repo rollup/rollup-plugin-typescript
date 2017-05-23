@@ -12,6 +12,7 @@ export default {
 		'object-assign',
 		'rollup-pluginutils',
 		'tippex',
+		'tslib',
 		'typescript'
 	],
 

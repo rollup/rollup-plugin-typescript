@@ -9,7 +9,7 @@ process.chdir( __dirname );
 function evaluate ( bundle ) {
 	const module = { exports: {} };
 
-	new Function( 'module', 'exports', bundle.generate({ format: 'cjs' }).code )( module, module.exports );
+	new Function( 'module', 'exports', 'require', bundle.generate({ format: 'cjs' }).code )( module, module.exports, require ); // pass require for tslib
 
 	return module.exports;
 }
@@ -47,17 +47,18 @@ describe( 'rollup-plugin-typescript', function () {
 			});
 	});
 
-	it( 'does not duplicate helpers', () => {
-		return bundle( 'sample/dedup-helpers/main.ts' ).then( bundle => {
-			const code = bundle.generate().code;
-
-			// The `__extends` function is defined in the bundle.
-			assert.ok( code.indexOf( 'function __extends' ) > -1, code );
-
-			// No duplicate `__extends` helper is defined.
-			assert.equal( code.indexOf( '__extends$1' ), -1, code );
-		});
-	});
+	//// test removed as switching to tslib means that helpers are always deduped
+	// it( 'does not duplicate helpers', () => {
+	// 	return bundle( 'sample/dedup-helpers/main.ts' ).then( bundle => {
+	// 		const code = bundle.generate().code;
+	//
+	// 		// The `__extends` function is defined in the bundle.
+	// 		assert.ok( code.indexOf( 'function __extends' ) > -1, code );
+	//
+	// 		// No duplicate `__extends` helper is defined.
+	// 		assert.equal( code.indexOf( '__extends$1' ), -1, code );
+	// 	});
+	// });
 
 	it( 'transpiles `export class A` correctly', () => {
 		return bundle( 'sample/export-class-fix/main.ts' ).then( bundle => {
@@ -179,10 +180,11 @@ describe( 'rollup-plugin-typescript', function () {
 		return bundle( 'sample/jsx/main.tsx', { jsx: 'react' }).then( bundle => {
 			const code = bundle.generate().code;
 
-			assert.notEqual( code.indexOf( 'const __assign = ' ), -1,
-				'should contain __assign definition' );
+			//// assertion disabled since this is now handled by typescript
+			// assert.notEqual( code.indexOf( 'const __assign = ' ), -1,
+			// 	'should contain __assign definition' );
 
-			const usage = code.indexOf( 'React.createElement("span", __assign({}, props), "Yo!")' );
+			const usage = code.indexOf( 'React.createElement("span", tslib_1.__assign({}, props), "Yo!")' );
 
 			assert.notEqual( usage, -1, 'should contain usage' );
 		});
@@ -209,15 +211,24 @@ describe( 'rollup-plugin-typescript', function () {
 		});
 	});
 
-	it( 'does not include helpers in source maps', () => {
-		return bundle( 'sample/dedup-helpers/main.ts', {
-			sourceMap: true
-		}).then( bundle => {
-			const { map } = bundle.generate({
-				sourceMap: true
-			});
+	//// test removed as typescript handles this
+	// it( 'does not include helpers in source maps', () => {
+	// 	return bundle( 'sample/dedup-helpers/main.ts', {
+	// 		sourceMap: true
+	// 	}).then( bundle => {
+	// 		const { map } = bundle.generate({
+	// 			sourceMap: true
+	// 		});
+	//
+	// 		assert.ok( map.sources.every( source => source.indexOf( 'typescript-helpers' ) === -1) );
+	// 	});
+	// });
 
-			assert.ok( map.sources.every( source => source.indexOf( 'typescript-helpers' ) === -1) );
+	it( 'supports tslib helpers', () => {
+		return bundle( 'sample/tslib-helpers/main.ts' ).then( bundle => {
+			const code = bundle.generate().code;
+
+			assert.notEqual( code.indexOf( 'from \'tslib\'' ), -1, 'should import tslib' );
 		});
 	});
 });

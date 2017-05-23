@@ -65,4 +65,8 @@ export function adjustCompilerOptions ( typescript, options ) {
 
 		console.warn( `rollup-plugin-typescript: 'strictNullChecks' is not supported; disabling it` );
 	}
+
+	if ( compareVersions( tsVersion, '2.0.0' ) >= 0) {
+		options.importHelpers = true;
+	}
 }
