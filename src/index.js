@@ -127,7 +127,11 @@ export default function typescript ( options ) {
 		transform ( code, id ) {
 			if ( !filter( id ) ) return null;
 
-			const transformed = compiler.compileFile(id, fixExportClass( code, id ), !isFirstRun);
+			if ( compilerOptions.target === undefined || compilerOptions.target < typescript.ScriptTarget.ES2015 && isVersionOne ) {
+				code = fixExportClass( code, id );
+			}
+
+			const transformed = compiler.compileFile( id, code, !isFirstRun );
 
 			// All errors except `Cannot compile modules into 'es6' when targeting 'ES5' or lower.`
 			const diagnostics = transformed.diagnostics ?

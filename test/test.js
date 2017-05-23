@@ -71,6 +71,16 @@ describe( 'rollup-plugin-typescript', function () {
 		});
 	});
 
+	it( 'does not fix export class when targeting ES6', function () {
+		return bundle( 'sample/export-class-no-fix/main.ts', {
+			target: 'ES6'
+		}).then( function ( bundle ) {
+			const code = bundle.generate().code;
+
+            assert.ok( code.indexOf( 'export default main' ) !== -1, code );
+		});
+	});
+
 	it( 'transpiles ES6 features to ES5 with source maps', () => {
 		return bundle( 'sample/import-class/main.ts' ).then( bundle => {
 			const code = bundle.generate().code;
@@ -267,6 +277,14 @@ function fakeTypescript ( custom ) {
 				options,
 				errors: []
 			};
+		},
+
+		ScriptTarget: {
+			ES3: 0,
+			ES5: 1,
+			ES6: 2,
+			ES2015: 2,
+			Latest: 2
 		}
 	}, custom);
 }
