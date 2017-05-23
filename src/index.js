@@ -37,6 +37,10 @@ export default function typescript ( options ) {
 	// Allow users to override the TypeScript version used for transpilation.
 	const typescript = options.typescript || ts;
 
+	if ( compareVersions( typescript.version, '1.6.0' ) < 0 ) {
+		throw new Error( `rollup-plugin-typescript: TypeScript version must be later than 1.6.0` );
+	}
+
 	delete options.typescript;
 
 	// Load options from `tsconfig.json` unless explicitly asked not to.
