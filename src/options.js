@@ -37,10 +37,10 @@ function findFile ( cwd, filename ) {
 	return null;
 }
 
-export function compilerOptionsFromTsConfig ( typescript ) {
+export function compilerOptionsFromTsConfig ( typescript, filename) {
 	const cwd = process.cwd();
 
-	const tsconfig = typescript.readConfigFile( findFile( cwd, 'tsconfig.json' ), path => readFileSync( path, 'utf8' ) );
+	const tsconfig = typescript.readConfigFile( findFile( cwd, filename ), path => readFileSync( path, 'utf8' ) );
 
 	if ( !tsconfig.config || !tsconfig.config.compilerOptions ) return {};
 
