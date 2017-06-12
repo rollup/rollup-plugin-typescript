@@ -37,7 +37,7 @@
     "buble": "^0.13.1",
     "eslint": "^2.13.1",
     "mocha": "^3.0.0",
-    "rimraf": "^2.5.4",
+    "rimraf": "^2.6.1",
     "rollup": "^0.34.3",
     "rollup-plugin-buble": "^0.13.0"
   },
