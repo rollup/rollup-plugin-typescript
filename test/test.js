@@ -19,7 +19,6 @@ function evaluate ( bundle ) {
 function bundle ( main, options ) {
 	return rollup.rollup({
 		entry: main,
-		format: 'es',
 		plugins: [ typescript( options ) ]
 	});
 }
