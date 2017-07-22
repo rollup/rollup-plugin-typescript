@@ -30,7 +30,7 @@
     "compare-versions": "3.0.1",
     "object-assign": "^4.0.1",
     "rollup-pluginutils": "^2.0.1",
-    "tippex": "^2.1.1",
+    "tippex": "^3.0.0",
     "typescript": "^1.8.9"
   },
   "devDependencies": {
