@@ -31,7 +31,7 @@
     "object-assign": "^4.0.1",
     "rollup-pluginutils": "^2.0.1",
     "tippex": "^3.0.0",
-    "typescript": "^1.8.9"
+    "typescript": "^2.4.2"
   },
   "devDependencies": {
     "buble": "^0.15.2",
