@@ -9,9 +9,10 @@ process.chdir( __dirname );
 function evaluate ( bundle ) {
 	const module = { exports: {} };
 
-	new Function( 'module', 'exports', bundle.generate({ format: 'cjs' }).code )( module, module.exports );
-
-	return module.exports;
+	return bundle.generate({ format: 'cjs' }).then(({ code }) => {
+		new Function( 'module', 'exports', code )( module, module.exports );
+		return module.exports;
+	});
 }
 
 // Short-hand for rollup using the typescript plugin.
@@ -27,10 +28,10 @@ describe( 'rollup-plugin-typescript', function () {
 
 	it( 'runs code through typescript', () => {
 		return bundle( 'sample/basic/main.ts' ).then( bundle => {
-			const code = bundle.generate().code;
-
-			assert.ok( code.indexOf( 'number' ) === -1, code );
-			assert.ok( code.indexOf( 'const' ) === -1, code );
+			return bundle.generate().then(({ code }) => {
+				assert.ok( code.indexOf( 'number' ) === -1, code );
+				assert.ok( code.indexOf( 'const' ) === -1, code );
+			});
 		});
 	});
 
@@ -41,42 +42,42 @@ describe( 'rollup-plugin-typescript', function () {
 	it( 'handles async functions', () => {
 		return bundle( 'sample/async/main.ts' )
 			.then( bundle => {
-				const wait = evaluate( bundle );
-
-				return wait( 3 );
+				return evaluate( bundle ).then(wait => {
+					return wait( 3 );
+				});
 			});
 	});
 
 	it( 'does not duplicate helpers', () => {
 		return bundle( 'sample/dedup-helpers/main.ts' ).then( bundle => {
-			const code = bundle.generate().code;
+			return bundle.generate().then(({ code }) => {
+				// The `__extends` function is defined in the bundle.
+				assert.ok( code.indexOf( 'function __extends' ) > -1, code );
 
-			// The `__extends` function is defined in the bundle.
-			assert.ok( code.indexOf( 'function __extends' ) > -1, code );
-
-			// No duplicate `__extends` helper is defined.
-			assert.equal( code.indexOf( '__extends$1' ), -1, code );
+				// No duplicate `__extends` helper is defined.
+				assert.equal( code.indexOf( '__extends$1' ), -1, code );
+			});
 		});
 	});
 
 	it( 'transpiles `export class A` correctly', () => {
 		return bundle( 'sample/export-class-fix/main.ts' ).then( bundle => {
-			const code = bundle.generate().code;
-
-			assert.equal( code.indexOf( 'class' ), -1, code );
-			assert.ok( code.indexOf( 'var A = (function' ) !== -1, code );
-			assert.ok( code.indexOf( 'var B = (function' ) !== -1, code );
-			assert.ok( code.indexOf( 'export { A, B };' ) !== -1, code );
+			return bundle.generate().then(({ code }) => {
+				assert.equal( code.indexOf( 'class' ), -1, code );
+				assert.ok( code.indexOf( 'var A = (function' ) !== -1, code );
+				assert.ok( code.indexOf( 'var B = (function' ) !== -1, code );
+				assert.ok( code.indexOf( 'export { A, B };' ) !== -1, code );
+			});
 		});
 	});
 
 	it( 'transpiles ES6 features to ES5 with source maps', () => {
 		return bundle( 'sample/import-class/main.ts' ).then( bundle => {
-			const code = bundle.generate().code;
-
-			assert.equal( code.indexOf( 'class' ), -1, code );
-			assert.equal( code.indexOf( '...' ), -1, code );
-			assert.equal( code.indexOf( '=>' ), -1, code );
+			return bundle.generate().then(({ code }) => {
+				assert.equal( code.indexOf( 'class' ), -1, code );
+				assert.equal( code.indexOf( '...' ), -1, code );
+				assert.equal( code.indexOf( '=>' ), -1, code );
+			});
 		});
 	});
 
@@ -88,14 +89,17 @@ describe( 'rollup-plugin-typescript', function () {
 
 	it( 'works with named exports for abstract classes', () => {
 		return bundle( 'sample/export-abstract-class/main.ts' ).then(bundle => {
-			const code = bundle.generate().code;
-			assert.ok( code.length > 0, code );
+			return bundle.generate().then(({ code }) => {
+				assert.ok( code.length > 0, code );
+			});
 		});
 	});
 
 	it( 'should use named exports for classes', () => {
 		return bundle( 'sample/export-class/main.ts' ).then( bundle => {
-			assert.equal( evaluate( bundle ).foo, 'bar' );
+			return evaluate( bundle ).then(result => {
+				assert.equal( result.foo, 'bar' );
+			});
 		});
 	});
 
@@ -118,7 +122,9 @@ describe( 'rollup-plugin-typescript', function () {
 				}
 			})
 		}).then( bundle => {
-			assert.equal( evaluate( bundle ), 1337 );
+			return evaluate( bundle ).then(result => {
+				assert.equal( result, 1337 );
+			});
 		});
 	});
 
@@ -177,14 +183,14 @@ describe( 'rollup-plugin-typescript', function () {
 
 	it( 'should transpile JSX if enabled', () => {
 		return bundle( 'sample/jsx/main.tsx', { jsx: 'react' }).then( bundle => {
-			const code = bundle.generate().code;
+			return bundle.generate().then(({ code }) => {
+				assert.notEqual( code.indexOf( 'const __assign = ' ), -1,
+					'should contain __assign definition' );
 
-			assert.notEqual( code.indexOf( 'const __assign = ' ), -1,
-				'should contain __assign definition' );
+				const usage = code.indexOf( 'React.createElement("span", __assign({}, props), "Yo!")' );
 
-			const usage = code.indexOf( 'React.createElement("span", __assign({}, props), "Yo!")' );
-
-			assert.notEqual( usage, -1, 'should contain usage' );
+				assert.notEqual( usage, -1, 'should contain usage' );
+			});
 		});
 	});
 
@@ -213,11 +219,11 @@ describe( 'rollup-plugin-typescript', function () {
 		return bundle( 'sample/dedup-helpers/main.ts', {
 			sourceMap: true
 		}).then( bundle => {
-			const { map } = bundle.generate({
+			return bundle.generate({
 				sourceMap: true
+			}).then(({ map }) => {
+				assert.ok( map.sources.every( source => source.indexOf( 'typescript-helpers' ) === -1) );
 			});
-
-			assert.ok( map.sources.every( source => source.indexOf( 'typescript-helpers' ) === -1) );
 		});
 	});
 });
