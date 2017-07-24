@@ -23,7 +23,9 @@
     "lint": "eslint src test/*.js",
     "pretest": "npm run build",
     "test": "mocha --compilers js:buble/register",
+    "postinstall": "npm run build",
     "posttest": "npm run lint",
+    "prepare": "npm run build",
     "prepublish": "npm run test"
   },
   "dependencies": {
