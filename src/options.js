@@ -44,6 +44,11 @@ export function compilerOptionsFromTsConfig ( typescript ) {
 
 	if ( !tsconfig.config || !tsconfig.config.compilerOptions ) return {};
 
+	if (tsconfig.config.extends) {
+		const currentPath = path.resolve(".");
+		return mergeCompilerOptions(currentPath, tsconfig.config.compilerOptions, tsconfig.config.extends);
+	}
+
 	return tsconfig.config.compilerOptions;
 }
 
@@ -64,5 +69,34 @@ export function adjustCompilerOptions ( typescript, options ) {
 		delete options.strictNullChecks;
 
 		console.warn( `rollup-plugin-typescript: 'strictNullChecks' is not supported; disabling it` );
+	}
+}
+
+/**
+ * Typescript 2.1 introduced configuration inheritance.
+ * See: https://www.typescriptlang.org/docs/handbook/release-notes/typescript-2-1.html
+ * This function merges all parent compilerOptions.
+ */
+function mergeCompilerOptions (currentPath, compilerOptions, extendsPath) {
+	const parentFile = path.join(currentPath, extendsPath);
+	const parentDir = path.dirname(parentFile);
+
+	const parentConfig = require(parentFile);
+
+	let parentCompilerOptions;
+
+	if (parentConfig.compilerOptions) {
+		parentCompilerOptions = parentConfig.compilerOptions;
+		for (const key of Object.keys(compilerOptions)) {
+			parentCompilerOptions[key] = compilerOptions[key];
+		}
+	} else {
+		parentCompilerOptions = compilerOptions;
+	}
+
+	if (parentConfig.extends) {
+		return mergeCompilerOptions(parentDir, parentCompilerOptions, parentConfig.extends);
+	} else {
+		return parentCompilerOptions;
 	}
 }
