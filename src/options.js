@@ -45,8 +45,7 @@ export function compilerOptionsFromTsConfig ( typescript ) {
 	if ( !tsconfig.config || !tsconfig.config.compilerOptions ) return {};
 
 	if (tsconfig.config.extends) {
-		const currentPath = path.resolve(".");
-		return mergeCompilerOptions(currentPath, tsconfig.config.compilerOptions, tsconfig.config.extends);
+		return mergeInheritedCompilerOptions(tsconfig.config);
 	}
 
 	return tsconfig.config.compilerOptions;
@@ -75,28 +74,28 @@ export function adjustCompilerOptions ( typescript, options ) {
 /**
  * Typescript 2.1 introduced configuration inheritance.
  * See: https://www.typescriptlang.org/docs/handbook/release-notes/typescript-2-1.html
- * This function merges all parent compilerOptions.
+ * This function merges all inherited compilerOptions.
  */
-function mergeCompilerOptions (currentPath, compilerOptions, extendsPath) {
-	const parentFile = path.join(currentPath, extendsPath);
-	const parentDir = path.dirname(parentFile);
+function mergeInheritedCompilerOptions (config) {
+	const compilerOptions = [config.compilerOptions];
+	let currentDir = path.resolve(".");
 
-	const parentConfig = require(parentFile);
+	while (config.extends) {
+		const parentFile = path.join(currentDir, config.extends);
+		const parentDir = path.dirname(parentFile);
+		const parentConfig = require(parentFile);
 
-	let parentCompilerOptions;
-
-	if (parentConfig.compilerOptions) {
-		parentCompilerOptions = parentConfig.compilerOptions;
-		for (const key of Object.keys(compilerOptions)) {
-			parentCompilerOptions[key] = compilerOptions[key];
+		if (parentConfig.compilerOptions) {
+			compilerOptions.push(parentConfig.compilerOptions);
 		}
-	} else {
-		parentCompilerOptions = compilerOptions;
+
+		config = parentConfig;
+		currentDir = parentDir;
 	}
 
-	if (parentConfig.extends) {
-		return mergeCompilerOptions(parentDir, parentCompilerOptions, parentConfig.extends);
-	} else {
-		return parentCompilerOptions;
-	}
+	const baseOption = compilerOptions.pop();
+	compilerOptions.reverse();
+	Object.assign(baseOption, ...compilerOptions);
+
+	return baseOption;
 }
