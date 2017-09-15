@@ -1,9 +1,8 @@
 import buble from 'rollup-plugin-buble';
-
-var pkg = require( './package.json' );
+import pkg from './package.json';
 
 export default {
-	entry: 'src/index.js',
+	input: 'src/index.js',
 
 	external: [
 		'compare-versions',
@@ -19,14 +18,14 @@ export default {
 		buble()
 	],
 
-	targets: [
+	output: [
 		{
 			format: 'cjs',
-			dest: pkg.main
+			file: pkg.main
 		},
 		{
 			format: 'es',
-			dest: pkg.module
+			file: pkg.module
 		}
 	]
 };

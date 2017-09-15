@@ -6,10 +6,10 @@ const typescript = require( '..' );
 process.chdir( __dirname );
 
 // Evaluate a bundle (as CommonJS) and return its exports.
-function evaluate ( bundle ) {
+async function evaluate ( bundle ) {
 	const module = { exports: {} };
 
-	new Function( 'module', 'exports', bundle.generate({ format: 'cjs' }).code )( module, module.exports );
+	new Function( 'module', 'exports', (await bundle.generate({ format: 'cjs' })).code )( module, module.exports );
 
 	return module.exports;
 }
@@ -17,7 +17,7 @@ function evaluate ( bundle ) {
 // Short-hand for rollup using the typescript plugin.
 function bundle ( main, options ) {
 	return rollup.rollup({
-		entry: main,
+		input: main,
 		plugins: [ typescript( options ) ]
 	});
 }
@@ -25,82 +25,80 @@ function bundle ( main, options ) {
 describe( 'rollup-plugin-typescript', function () {
 	this.timeout( 5000 );
 
-	it( 'runs code through typescript', () => {
-		return bundle( 'sample/basic/main.ts' ).then( bundle => {
-			const code = bundle.generate().code;
+	it( 'runs code through typescript', async () => {
+		const b = await bundle( 'sample/basic/main.ts' );
+		const { code } = await b.generate({ format: 'es' });
 
-			assert.ok( code.indexOf( 'number' ) === -1, code );
-			assert.ok( code.indexOf( 'const' ) === -1, code );
-		});
+		assert.ok( code.indexOf( 'number' ) === -1, code );
+		assert.ok( code.indexOf( 'const' ) === -1, code );
 	});
 
 	it( 'ignores the declaration option', () => {
 		return bundle( 'sample/basic/main.ts', { declaration: true });
 	});
 
-	it( 'handles async functions', () => {
-		return bundle( 'sample/async/main.ts' )
-			.then( bundle => {
-				const wait = evaluate( bundle );
+	it( 'handles async functions', async () => {
+		const b = await bundle( 'sample/async/main.ts' );
+		const wait = await evaluate(b);
 
-				return wait( 3 );
-			});
+		return wait(3);
 	});
 
-	it( 'does not duplicate helpers', () => {
-		return bundle( 'sample/dedup-helpers/main.ts' ).then( bundle => {
-			const code = bundle.generate().code;
+	it( 'does not duplicate helpers', async () => {
+		const b = await bundle( 'sample/dedup-helpers/main.ts' );
+		const { code } = await b.generate({ format: 'es' });
 
-			// The `__extends` function is defined in the bundle.
-			assert.ok( code.indexOf( 'function __extends' ) > -1, code );
+		// The `__extends` function is defined in the bundle.
+		assert.ok( code.indexOf( 'function __extends' ) > -1, code );
 
-			// No duplicate `__extends` helper is defined.
-			assert.equal( code.indexOf( '__extends$1' ), -1, code );
-		});
+		// No duplicate `__extends` helper is defined.
+		assert.equal( code.indexOf( '__extends$1' ), -1, code );
 	});
 
-	it( 'transpiles `export class A` correctly', () => {
-		return bundle( 'sample/export-class-fix/main.ts' ).then( bundle => {
-			const code = bundle.generate().code;
+	it( 'transpiles `export class A` correctly', async () => {
+		const b = await bundle( 'sample/export-class-fix/main.ts' );
+		const { code } = await b.generate({ format: 'es' });
 
-			assert.equal( code.indexOf( 'class' ), -1, code );
-			assert.ok( code.indexOf( 'var A = (function' ) !== -1, code );
-			assert.ok( code.indexOf( 'var B = (function' ) !== -1, code );
-			assert.ok( code.indexOf( 'export { A, B };' ) !== -1, code );
-		});
+		assert.equal( code.indexOf( 'class' ), -1, code );
+		assert.ok( code.indexOf( 'var A = (function' ) !== -1, code );
+		assert.ok( code.indexOf( 'var B = (function' ) !== -1, code );
+		assert.ok( code.indexOf( 'export { A, B };' ) !== -1, code );
 	});
 
-	it( 'transpiles ES6 features to ES5 with source maps', () => {
-		return bundle( 'sample/import-class/main.ts' ).then( bundle => {
-			const code = bundle.generate().code;
+	it( 'transpiles ES6 features to ES5 with source maps', async () => {
+		const b = await bundle( 'sample/import-class/main.ts' );
+		const { code } = await b.generate({ format: 'es' });
 
-			assert.equal( code.indexOf( 'class' ), -1, code );
-			assert.equal( code.indexOf( '...' ), -1, code );
-			assert.equal( code.indexOf( '=>' ), -1, code );
-		});
+		assert.equal( code.indexOf( 'class' ), -1, code );
+		assert.equal( code.indexOf( '...' ), -1, code );
+		assert.equal( code.indexOf( '=>' ), -1, code );
 	});
 
-	it( 'reports diagnostics and throws if errors occur during transpilation', () => {
-		return bundle( 'sample/syntax-error/missing-type.ts' ).catch( error => {
-			assert.ok( error.message.indexOf( 'There were TypeScript errors transpiling' ) !== -1, 'Should reject erroneous code.' );
-		});
+	it( 'reports diagnostics and throws if errors occur during transpilation', async () => {
+		let errored;
+		try {
+			await bundle( 'sample/syntax-error/missing-type.ts' );
+		} catch (err) {
+			errored = true;
+			assert.ok( err.message.indexOf( 'There were TypeScript errors transpiling' ) !== -1, 'Should reject erroneous code.' );
+		}
+
+		assert.ok(errored);
 	});
 
-	it( 'works with named exports for abstract classes', () => {
-		return bundle( 'sample/export-abstract-class/main.ts' ).then(bundle => {
-			const code = bundle.generate().code;
-			assert.ok( code.length > 0, code );
-		});
+	it( 'works with named exports for abstract classes', async () => {
+		const b = await bundle( 'sample/export-abstract-class/main.ts' );
+		const { code } = await b.generate({ format: 'es' });
+		assert.ok( code.length > 0, code );
 	});
 
-	it( 'should use named exports for classes', () => {
-		return bundle( 'sample/export-class/main.ts' ).then( bundle => {
-			assert.equal( evaluate( bundle ).foo, 'bar' );
-		});
+	it( 'should use named exports for classes', async () => {
+		const b = await bundle( 'sample/export-class/main.ts' );
+		assert.equal( (await evaluate( b )).foo, 'bar' );
 	});
 
-	it( 'supports overriding the TypeScript version', () => {
-		return bundle('sample/overriding-typescript/main.ts', {
+	it( 'supports overriding the TypeScript version', async () => {
+		const b = await bundle('sample/overriding-typescript/main.ts', {
 			// Don't use `tsconfig.json`
 			tsconfig: false,
 
@@ -117,14 +115,14 @@ describe( 'rollup-plugin-typescript', function () {
 					};
 				}
 			})
-		}).then( bundle => {
-			assert.equal( evaluate( bundle ), 1337 );
 		});
+
+		assert.equal( await evaluate( b ), 1337 );
 	});
 
 	describe( 'strictNullChecks', () => {
-		it( 'is enabled for versions >= 1.9.0', () => {
-			return bundle( 'sample/overriding-typescript/main.ts', {
+		it( 'is enabled for versions >= 1.9.0', async () => {
+			await bundle( 'sample/overriding-typescript/main.ts', {
 				tsconfig: false,
 				strictNullChecks: true,
 
@@ -144,15 +142,15 @@ describe( 'rollup-plugin-typescript', function () {
 			});
 		});
 
-		it( 'is disabled with a warning < 1.9.0', () => {
+		it( 'is disabled with a warning < 1.9.0', async () => {
 			let warning = '';
 
 			console.warn = function (msg) {
 				warning = msg;
 			};
 
-			return rollup.rollup({
-				entry: 'sample/overriding-typescript/main.ts',
+			await rollup.rollup({
+				input: 'sample/overriding-typescript/main.ts',
 				plugins: [
 					typescript({
 						tsconfig: false,
@@ -163,29 +161,27 @@ describe( 'rollup-plugin-typescript', function () {
 						})
 					})
 				]
-			}).then( () => {
-				assert.notEqual( warning.indexOf( "'strictNullChecks' is not supported" ), -1 );
 			});
+
+			assert.notEqual( warning.indexOf( "'strictNullChecks' is not supported" ), -1 );
 		});
 	});
 
-	it( 'should not resolve .d.ts files', () => {
-		return bundle( 'sample/dts/main.ts' ).then( bundle => {
-			assert.deepEqual( bundle.imports, [ 'an-import' ] );
-		});
+	it( 'should not resolve .d.ts files', async () => {
+		const b = await bundle( 'sample/dts/main.ts' );
+		assert.deepEqual( b.imports, [ 'an-import' ] );
 	});
 
-	it( 'should transpile JSX if enabled', () => {
-		return bundle( 'sample/jsx/main.tsx', { jsx: 'react' }).then( bundle => {
-			const code = bundle.generate().code;
+	it( 'should transpile JSX if enabled', async () => {
+		const b = await bundle( 'sample/jsx/main.tsx', { jsx: 'react' });
+		const { code } = await b.generate({ format: 'es' });
 
-			assert.notEqual( code.indexOf( 'const __assign = ' ), -1,
-				'should contain __assign definition' );
+		assert.notEqual( code.indexOf( 'const __assign = ' ), -1,
+			'should contain __assign definition' );
 
-			const usage = code.indexOf( 'React.createElement("span", __assign({}, props), "Yo!")' );
+		const usage = code.indexOf( 'React.createElement("span", __assign({}, props), "Yo!")' );
 
-			assert.notEqual( usage, -1, 'should contain usage' );
-		});
+		assert.notEqual( usage, -1, 'should contain usage' );
 	});
 
 	it( 'should throw on bad options', () => {
@@ -209,16 +205,17 @@ describe( 'rollup-plugin-typescript', function () {
 		});
 	});
 
-	it( 'does not include helpers in source maps', () => {
-		return bundle( 'sample/dedup-helpers/main.ts', {
+	it( 'does not include helpers in source maps', async () => {
+		const b = await bundle( 'sample/dedup-helpers/main.ts', {
 			sourceMap: true
-		}).then( bundle => {
-			const { map } = bundle.generate({
-				sourceMap: true
-			});
-
-			assert.ok( map.sources.every( source => source.indexOf( 'typescript-helpers' ) === -1) );
 		});
+
+		const { map } = await b.generate({
+			format: 'es',
+			sourcemap: true
+		});
+
+		assert.ok( map.sources.every( source => source.indexOf( 'typescript-helpers' ) === -1) );
 	});
 });
 
