@@ -86,7 +86,7 @@ export default function typescript ( options ) {
 
 	return {
 		options (opts) {
-			const entryFile = path.resolve(process.cwd(), opts.entry);
+			const entryFile = path.resolve(process.cwd(), opts.input || opts.entry);
 			compiler = createCompiler( typescript, compilerOptions, entryFile, useLanguageService );
 
 			const definitionsFilter = createFilter(
