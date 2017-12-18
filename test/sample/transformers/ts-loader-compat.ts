@@ -1,0 +1,1 @@
+safely(a.b);

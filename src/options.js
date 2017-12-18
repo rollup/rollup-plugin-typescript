@@ -59,10 +59,19 @@ export function adjustCompilerOptions ( typescript, options ) {
 	// See: https://github.com/rollup/rollup-plugin-typescript/issues/45
 	delete options.declaration;
 
-	const tsVersion = typescript.version.split('-')[0];
-	if ( 'strictNullChecks' in options && compareVersions( tsVersion, '1.9.0' ) < 0 ) {
-		delete options.strictNullChecks;
+	const requiredVersions = {
+		strictNullChecks: '1.9.0',
+		getCustomTransformers: '2.3.0'
+	};
 
-		console.warn( `rollup-plugin-typescript: 'strictNullChecks' is not supported; disabling it` );
-	}
+	const tsVersion = typescript.version.split('-')[0];
+
+	Object.keys(requiredVersions).forEach((key) => {
+		const version = requiredVersions[key];
+		if (key in options && compareVersions( tsVersion, version ) < 0) {
+			delete options[key];
+
+			console.warn( `rollup-plugin-typescript: '${key}' is not supported with TypeScript < v${version}; disabling it` );
+		}
+	});
 }

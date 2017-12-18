@@ -50,6 +50,9 @@ export default function typescript ( options ) {
 	adjustCompilerOptions( typescript, tsconfig );
 	adjustCompilerOptions( typescript, options );
 
+	const transformers = typeof options.getCustomTransformers === 'function' ? options.getCustomTransformers() : null;
+	delete options.getCustomTransformers;
+
 	// Merge all options.
 	options = assign( tsconfig, getDefaultOptions(), options );
 
@@ -108,11 +111,17 @@ export default function typescript ( options ) {
 		transform ( code, id ) {
 			if ( !filter( id ) ) return null;
 
-			const transformed = typescript.transpileModule( fixExportClass( code, id ), {
+			const opts = {
 				fileName: id,
 				reportDiagnostics: true,
 				compilerOptions
-			});
+			};
+
+			if (transformers) {
+				opts.transformers = transformers;
+			}
+
+			const transformed = typescript.transpileModule( fixExportClass( code, id ), opts );
 
 			// All errors except `Cannot compile modules into 'es6' when targeting 'ES5' or lower.`
 			const diagnostics = transformed.diagnostics ?

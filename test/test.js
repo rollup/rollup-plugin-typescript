@@ -22,6 +22,14 @@ function bundle ( main, options ) {
 	});
 }
 
+function getNextWarning ( callback ) {
+	const warn = console.warn;
+	console.warn = (message) => {
+		console.warn = warn;
+		callback(message);
+	};
+}
+
 describe( 'rollup-plugin-typescript', function () {
 	this.timeout( 5000 );
 
@@ -38,7 +46,9 @@ describe( 'rollup-plugin-typescript', function () {
 	});
 
 	it( 'handles async functions', async () => {
-		const b = await bundle( 'sample/async/main.ts' );
+		const b = await bundle( 'sample/async/main.ts', {
+			target: 'es2015'
+		});
 		const wait = await evaluate(b);
 
 		return wait(3);
@@ -59,17 +69,17 @@ describe( 'rollup-plugin-typescript', function () {
 		const b = await bundle( 'sample/export-class-fix/main.ts' );
 		const { code } = await b.generate({ format: 'es' });
 
-		assert.equal( code.indexOf( 'class' ), -1, code );
-		assert.ok( code.indexOf( 'var A = (function' ) !== -1, code );
-		assert.ok( code.indexOf( 'var B = (function' ) !== -1, code );
-		assert.ok( code.indexOf( 'export { A, B };' ) !== -1, code );
+		assert.equal( code.indexOf( 'class A' ), -1, code );
+		assert.notEqual( code.indexOf( 'var A = /** @class */ (function' ), -1, code );
+		assert.notEqual( code.indexOf( 'var B = /** @class */ (function' ), -1, code );
+		assert.notEqual( code.indexOf( 'export { A, B };' ), -1, code );
 	});
 
 	it( 'transpiles ES6 features to ES5 with source maps', async () => {
 		const b = await bundle( 'sample/import-class/main.ts' );
 		const { code } = await b.generate({ format: 'es' });
 
-		assert.equal( code.indexOf( 'class' ), -1, code );
+		assert.equal( code.indexOf( 'class A' ), -1, code );
 		assert.equal( code.indexOf( '...' ), -1, code );
 		assert.equal( code.indexOf( '=>' ), -1, code );
 	});
@@ -145,9 +155,9 @@ describe( 'rollup-plugin-typescript', function () {
 		it( 'is disabled with a warning < 1.9.0', async () => {
 			let warning = '';
 
-			console.warn = function (msg) {
-				warning = msg;
-			};
+			getNextWarning((message) => {
+				warning = message;
+			});
 
 			await rollup.rollup({
 				input: 'sample/overriding-typescript/main.ts',
@@ -216,6 +226,116 @@ describe( 'rollup-plugin-typescript', function () {
 		});
 
 		assert.ok( map.sources.every( source => source.indexOf( 'typescript-helpers' ) === -1) );
+	});
+
+	describe( 'transformers', () => {
+		it( 'is enabled for versions >= 2.3.0', async () => {
+			await bundle( 'sample/overriding-typescript/main.ts', {
+				tsconfig: false,
+				getCustomTransformers: () => ({}),
+
+				typescript: fakeTypescript({
+					version: '2.3.0-fake',
+					transpileModule ( code, options ) {
+						assert.ok( options.transformers,
+							'transformers should be passed in' );
+
+						return {
+							outputText: '',
+							diagnostics: [],
+							sourceMapText: JSON.stringify({ mappings: '' })
+						};
+					}
+				})
+			});
+		});
+
+		it( 'is disabled with a warning < 2.3.0', async () => {
+			let warning = '';
+
+			getNextWarning((message) => {
+				warning = message;
+			});
+
+			await rollup.rollup({
+				input: 'sample/overriding-typescript/main.ts',
+				plugins: [
+					typescript({
+						tsconfig: false,
+						getCustomTransformers: () => ({}),
+
+						typescript: fakeTypescript({
+							version: '2.2.0-fake'
+						})
+					})
+				]
+			});
+
+			assert.notEqual( warning.indexOf( "'getCustomTransformers' is not supported" ), -1 );
+		});
+
+		it( 'applies one correctly', async () => {
+			const transformers = require( './sample/transformers/transformers' );
+
+			const b = await bundle( 'sample/transformers/main.ts', {
+				getCustomTransformers: () => ({
+					before: [
+						transformers.guardedAccess()
+					]
+				})
+			});
+			const { code } = await b.generate({ format: 'es' });
+
+			assert.equal(
+				code.match(/function getName\(people, index\) {([\s\S]*?)}/)[1],
+				code.match(/function getName_transformed\(people, index\) {([\s\S]*?)}/)[1],
+				'output transformed function body should be identical to expected'
+			);
+		});
+
+		it( 'applies multiple correctly', async () => {
+			const transformers = require( './sample/transformers/transformers' );
+
+			const b = await bundle( 'sample/transformers/main.ts', {
+				getCustomTransformers: () => ({
+					before: [
+						transformers.guardedAccess(),
+						transformers.void0()
+					]
+				})
+			});
+			const { code } = await b.generate({ format: 'es' });
+
+			assert.equal(
+				code.match(/function getName\(people, index\) {([\s\S]*?)}/)[1],
+				code.match(/function getName_transformed\(people, index\) {([\s\S]*?)}/)[1],
+				'output transformed getName function body should equal to expectation'
+			);
+
+			assert.equal(
+				code.match(/function getNameUndefined\(people, index\) {([\s\S]*?)}/)[1],
+				code.match(/function getNameUndefined_transformed\(people, index\) {([\s\S]*?)}/)[1],
+				'output transformed getNameUndefined function body should equal to expectation'
+			);
+		});
+
+		it( 'supports format compatible with webpack ts-loader', async () => {
+			const transform = require('ts-transform-safely').transform;
+
+			const b = await bundle( 'sample/transformers/ts-loader-compat.ts', {
+				getCustomTransformers: () => ({
+					before: [
+						transform()
+					]
+				})
+			});
+
+			const { code } = await b.generate({ format: 'es' });
+			assert.equal(
+				code,
+				`a == null ? void 0 : a.b;\n`
+			);
+		});
 	});
 });
 
