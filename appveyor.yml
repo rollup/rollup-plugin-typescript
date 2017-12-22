@@ -7,9 +7,9 @@ build: off
 deploy: off
 
 install:
+  - node --version
+  - npm --version
   - npm install
 
 test_script:
-  - node --version
-  - npm --version
   - npm test
