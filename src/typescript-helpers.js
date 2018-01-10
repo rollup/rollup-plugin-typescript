@@ -1,4 +1,4 @@
-export const __assign = Object.assign || function (target) {
+export var __assign = Object.assign || function (target) {
     for (var source, i = 1; i < arguments.length; i++) {
         source = arguments[i];
         for (var prop in source) {
