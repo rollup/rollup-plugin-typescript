@@ -9,7 +9,8 @@ export function getDefaultOptions () {
 	return {
 		noEmitHelpers: true,
 		module: 'es2015',
-		sourceMap: true
+		sourceMap: true,
+		importHelpers: true
 	};
 }
 

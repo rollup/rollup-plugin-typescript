@@ -41,7 +41,7 @@ The following options are unique to `rollup-plugin-typescript`:
 * `typescript` overrides TypeScript used for transpilation
 
 ### TypeScript version
-[TypeScript 1.8.9](https://github.com/Microsoft/TypeScript/wiki/Roadmap#18) is used by default. Should your project require it, you can override the TypeScript version used for _transpiling the sources_.
+[TypeScript 2.6.2](https://github.com/Microsoft/TypeScript/wiki/Roadmap#26-october-2017) is used by default. Should your project require it, you can override the TypeScript version used for _transpiling the sources_.
 
 ```js
 typescript({
