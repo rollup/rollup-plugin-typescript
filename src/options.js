@@ -1,5 +1,4 @@
 import * as path from 'path';
-import compareVersions from 'compare-versions';
 import {
 	existsSync,
 	readFileSync
@@ -7,7 +6,6 @@ import {
 
 export function getDefaultOptions () {
 	return {
-		noEmitHelpers: true,
 		module: 'es2015',
 		sourceMap: true
 	};
@@ -59,10 +57,6 @@ export function adjustCompilerOptions ( typescript, options ) {
 	// See: https://github.com/rollup/rollup-plugin-typescript/issues/45
 	delete options.declaration;
 
-	const tsVersion = typescript.version.split('-')[0];
-	if ( 'strictNullChecks' in options && compareVersions( tsVersion, '1.9.0' ) < 0 ) {
-		delete options.strictNullChecks;
-
-		console.warn( `rollup-plugin-typescript: 'strictNullChecks' is not supported; disabling it` );
-	}
+	// Prevent duplication of helpers
+	options.importHelpers = true;
 }

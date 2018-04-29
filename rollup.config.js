@@ -5,13 +5,12 @@ export default {
 	input: 'src/index.js',
 
 	external: [
-		'compare-versions',
 		'path',
 		'fs',
-		'object-assign',
 		'rollup-pluginutils',
 		'tippex',
-		'typescript'
+		'typescript',
+		'tslib'
 	],
 
 	plugins: [

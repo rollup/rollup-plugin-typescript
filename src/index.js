@@ -1,32 +1,12 @@
 import * as ts from 'typescript';
 import { createFilter } from 'rollup-pluginutils';
-import * as path from 'path';
-import * as fs from 'fs';
-import assign from 'object-assign';
-import compareVersions from 'compare-versions';
 
 import { endsWith } from './string';
 import { getDefaultOptions, compilerOptionsFromTsConfig, adjustCompilerOptions } from './options.js';
 import fixExportClass from './fixExportClass';
 import resolveHost from './resolveHost';
 
-/*
-interface Options {
-	tsconfig?: boolean;
-	include?: string | string[];
-	exclude?: string | string[];
-	typescript?: typeof ts;
-	module?: string;
-}
-*/
-
-// The injected id for helpers. Intentially invalid to prevent helpers being included in source maps.
-const helpersId = '\0typescript-helpers';
-const helpersSource = fs.readFileSync( path.resolve( __dirname, '../src/typescript-helpers.js' ), 'utf-8' );
-
-export default function typescript ( options ) {
-	options = assign( {}, options || {} );
-
+export default function typescript ( options = {} ) {
 	const filter = createFilter(
 		options.include || [ '*.ts+(|x)', '**/*.ts+(|x)' ],
 		options.exclude || [ '*.d.ts', '**/*.d.ts' ] );
@@ -51,12 +31,7 @@ export default function typescript ( options ) {
 	adjustCompilerOptions( typescript, options );
 
 	// Merge all options.
-	options = assign( tsconfig, getDefaultOptions(), options );
-
-	// Verify that we're targeting ES2015 modules.
-	if ( options.module !== 'es2015' && options.module !== 'es6' ) {
-		throw new Error( `rollup-plugin-typescript: The module kind should be 'es2015', found: '${ options.module }'` );
-	}
+	options = Object.assign( tsconfig, getDefaultOptions(), options );
 
 	const parsed = typescript.convertCompilerOptionsFromJson( options, process.cwd() );
 
@@ -70,23 +45,13 @@ export default function typescript ( options ) {
 
 	return {
 		resolveId ( importee, importer ) {
-			// Handle the special `typescript-helpers` import itself.
-			if ( importee === helpersId ) {
-				return helpersId;
-			}
-
 			if ( !importer ) return null;
 
 			let result;
 
 			importer = importer.split('\\').join('/');
 
-			if ( compareVersions( typescript.version, '1.8.0' ) < 0 ) {
-				// Suppress TypeScript warnings for function call.
-				result = typescript.nodeModuleNameResolver( importee, importer, resolveHost );
-			} else {
-				result = typescript.nodeModuleNameResolver( importee, importer, compilerOptions, resolveHost );
-			}
+			result = typescript.nodeModuleNameResolver( importee, importer, compilerOptions, resolveHost );
 
 			if ( result.resolvedModule && result.resolvedModule.resolvedFileName ) {
 				if ( endsWith( result.resolvedModule.resolvedFileName, '.d.ts' ) ) {
@@ -97,12 +62,6 @@ export default function typescript ( options ) {
 			}
 
 			return null;
-		},
-
-		load ( id ) {
-			if ( id === helpersId ) {
-				return helpersSource;
-			}
 		},
 
 		transform ( code, id ) {
@@ -142,8 +101,7 @@ export default function typescript ( options ) {
 
 			return {
 				// Always append an import for the helpers.
-				code: transformed.outputText +
-					`\nimport { __assign, __awaiter, __extends, __decorate, __metadata, __param } from '${helpersId}';`,
+				code: transformed.outputText,
 
 				// Rollup expects `map` to be an object so we must parse the string
 				map: transformed.sourceMapText ? JSON.parse(transformed.sourceMapText) : null
