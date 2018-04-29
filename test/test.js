@@ -1,7 +1,7 @@
 const assert = require( 'assert' );
 const rollup = require( 'rollup' );
-const assign = require( 'object-assign' );
 const typescript = require( '..' );
+const resolve = require('rollup-plugin-node-resolve');
 
 process.chdir( __dirname );
 
@@ -18,7 +18,7 @@ async function evaluate ( bundle ) {
 function bundle ( main, options ) {
 	return rollup.rollup({
 		input: main,
-		plugins: [ typescript( options ) ]
+		plugins: [ resolve(), typescript( options ) ]
 	});
 }
 
@@ -49,7 +49,7 @@ describe( 'rollup-plugin-typescript', function () {
 		const { code } = await b.generate({ format: 'es' });
 
 		// The `__extends` function is defined in the bundle.
-		assert.ok( code.indexOf( 'function __extends' ) > -1, code );
+		assert.ok( code.indexOf( '__extends' ) > -1, code );
 
 		// No duplicate `__extends` helper is defined.
 		assert.equal( code.indexOf( '__extends$1' ), -1, code );
@@ -59,19 +59,9 @@ describe( 'rollup-plugin-typescript', function () {
 		const b = await bundle( 'sample/export-class-fix/main.ts' );
 		const { code } = await b.generate({ format: 'es' });
 
-		assert.equal( code.indexOf( 'class' ), -1, code );
-		assert.ok( code.indexOf( 'var A = (function' ) !== -1, code );
-		assert.ok( code.indexOf( 'var B = (function' ) !== -1, code );
+		assert.ok( code.indexOf( 'var A = /** @class */ (function' ) !== -1, code );
+		assert.ok( code.indexOf( 'var B = /** @class */ (function' ) !== -1, code );
 		assert.ok( code.indexOf( 'export { A, B };' ) !== -1, code );
-	});
-
-	it( 'transpiles ES6 features to ES5 with source maps', async () => {
-		const b = await bundle( 'sample/import-class/main.ts' );
-		const { code } = await b.generate({ format: 'es' });
-
-		assert.equal( code.indexOf( 'class' ), -1, code );
-		assert.equal( code.indexOf( '...' ), -1, code );
-		assert.equal( code.indexOf( '=>' ), -1, code );
 	});
 
 	it( 'reports diagnostics and throws if errors occur during transpilation', async () => {
@@ -120,53 +110,6 @@ describe( 'rollup-plugin-typescript', function () {
 		assert.equal( await evaluate( b ), 1337 );
 	});
 
-	describe( 'strictNullChecks', () => {
-		it( 'is enabled for versions >= 1.9.0', async () => {
-			await bundle( 'sample/overriding-typescript/main.ts', {
-				tsconfig: false,
-				strictNullChecks: true,
-
-				typescript: fakeTypescript({
-					version: '1.9.0-fake',
-					transpileModule ( code, options ) {
-						assert.ok( options.compilerOptions.strictNullChecks,
-							'strictNullChecks should be passed through' );
-
-						return {
-							outputText: '',
-							diagnostics: [],
-							sourceMapText: JSON.stringify({ mappings: '' })
-						};
-					}
-				})
-			});
-		});
-
-		it( 'is disabled with a warning < 1.9.0', async () => {
-			let warning = '';
-
-			console.warn = function (msg) {
-				warning = msg;
-			};
-
-			await rollup.rollup({
-				input: 'sample/overriding-typescript/main.ts',
-				plugins: [
-					typescript({
-						tsconfig: false,
-						strictNullChecks: true,
-
-						typescript: fakeTypescript({
-							version: '1.8.0-fake'
-						})
-					})
-				]
-			});
-
-			assert.notEqual( warning.indexOf( "'strictNullChecks' is not supported" ), -1 );
-		});
-	});
-
 	it( 'should not resolve .d.ts files', async () => {
 		const b = await bundle( 'sample/dts/main.ts' );
 		assert.deepEqual( b.imports, [ 'an-import' ] );
@@ -175,9 +118,6 @@ describe( 'rollup-plugin-typescript', function () {
 	it( 'should transpile JSX if enabled', async () => {
 		const b = await bundle( 'sample/jsx/main.tsx', { jsx: 'react' });
 		const { code } = await b.generate({ format: 'es' });
-
-		assert.notEqual( code.indexOf( 'const __assign = ' ), -1,
-			'should contain __assign definition' );
 
 		const usage = code.indexOf( 'React.createElement("span", __assign({}, props), "Yo!")' );
 
@@ -220,7 +160,7 @@ describe( 'rollup-plugin-typescript', function () {
 });
 
 function fakeTypescript ( custom ) {
-	return assign({
+	return Object.assign({
 		transpileModule () {
 			return {
 				outputText: '',
