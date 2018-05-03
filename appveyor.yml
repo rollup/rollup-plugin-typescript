@@ -10,9 +10,10 @@ deploy: off
 
 install:
   - ps: Install-Product node $env:nodejs_version
+  - npm i -g npm@latest
   - node --version
   - npm --version
-  - npm install
+  - npm ci
 
 test_script:
   - npm test
