@@ -2,7 +2,6 @@ const assert = require( 'assert' );
 const rollup = require( 'rollup' );
 const assign = require( 'object-assign' );
 const typescript = require( '..' );
-const util = require('util');
 const fs = require('fs');
 
 process.chdir( __dirname );
@@ -25,7 +24,7 @@ function bundle (main, options) {
 	result
 		.then(bundle => bundle.generate({ format: 'cjs' }))
 		.then(res => {
-			return util.promisify(fs.writeFile)(main + '.out', res.code);
+			fs.writeFileSync(main + '.out', res.code);
 		});
 	return result;
 }
