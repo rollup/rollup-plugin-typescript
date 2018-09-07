@@ -16,17 +16,13 @@ async function evaluate ( bundle ) {
 }
 
 // Short-hand for rollup using the typescript plugin.
-function bundle (main, options) {
-	const result = rollup.rollup({
+async function bundle (main, options) {
+	const bundle = await rollup.rollup({
 		input: main,
 		plugins: [typescript(options)]
 	});
-	result
-		.then(bundle => bundle.generate({ format: 'cjs' }))
-		.then(res => {
-			fs.writeFileSync(main + '.out', res.code);
-		});
-	return result;
+	fs.writeFileSync(main + '.out', (await bundle.generate({ format: 'cjs' })).code);
+	return bundle;
 }
 
 describe( 'rollup-plugin-typescript', function () {
@@ -195,12 +191,12 @@ describe( 'rollup-plugin-typescript', function () {
 		assert.notEqual( usage, -1, 'should contain usage' );
 	});
 
-	it( 'should throw on bad options', () => {
-		assert.throws( () => {
-			bundle( 'does-not-matter.ts', {
-				foo: 'bar'
-			});
-		}, /Couldn't process compiler options/ );
+	it('should throw on bad options', () => {
+		return bundle('does-not-matter.ts', {
+			foo: 'bar'
+		}).then(() => {
+			throw new Error('plugin did not throw');
+		}).catch(err => assert.equal(err.message, 'rollup-plugin-typescript: Couldn\'t process compiler options'));
 	});
 
 	it( 'prevents errors due to conflicting `sourceMap`/`inlineSourceMap` options', () => {

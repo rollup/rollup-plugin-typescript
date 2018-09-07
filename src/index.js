@@ -1,29 +1,16 @@
 import * as ts from 'typescript';
 import { createFilter } from 'rollup-pluginutils';
 import * as fs from 'fs';
-import assign from 'object-assign';
-import compareVersions from 'compare-versions';
 import resolveId from 'resolve';
-
 import { endsWith } from './string';
 import { getDefaultOptions, compilerOptionsFromTsConfig, adjustCompilerOptions } from './options.js';
 import resolveHost from './resolveHost';
 
-/*
-interface Options {
-	tsconfig?: boolean;
-	include?: string | string[];
-	exclude?: string | string[];
-	typescript?: typeof ts;
-	module?: string;
-}
-*/
-
-const helpersId = '\0tslib';
+const helpersId = 'tslib';
 const helpersSource = fs.readFileSync(resolveId.sync('tslib/tslib.es6.js', { basedir: __dirname }), 'utf-8' );
 
 export default function typescript ( options ) {
-	options = assign( {}, options || {} );
+	options = Object.assign( {}, options || {} );
 
 	const filter = createFilter(
 		options.include || [ '*.ts+(|x)', '**/*.ts+(|x)' ],
@@ -49,7 +36,7 @@ export default function typescript ( options ) {
 	adjustCompilerOptions( typescript, options );
 
 	// Merge all options.
-	options = assign( tsconfig, getDefaultOptions(), options );
+	options = Object.assign( tsconfig, getDefaultOptions(), options );
 
 	// Verify that we're targeting ES2015 modules.
 	if ( options.module !== 'es2015' && options.module !== 'es6' ) {
@@ -74,17 +61,9 @@ export default function typescript ( options ) {
 			}
 
 			if ( !importer ) return null;
-
-			let result;
-
 			importer = importer.split('\\').join('/');
 
-			if ( compareVersions( typescript.version, '1.8.0' ) < 0 ) {
-				// Suppress TypeScript warnings for function call.
-				result = typescript.nodeModuleNameResolver( importee, importer, resolveHost );
-			} else {
-				result = typescript.nodeModuleNameResolver( importee, importer, compilerOptions, resolveHost );
-			}
+			const result = typescript.nodeModuleNameResolver(importee, importer, compilerOptions, resolveHost);
 
 			if ( result.resolvedModule && result.resolvedModule.resolvedFileName ) {
 				if ( endsWith( result.resolvedModule.resolvedFileName, '.d.ts' ) ) {
