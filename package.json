@@ -24,7 +24,8 @@
     "pretest": "npm run build",
     "test": "mocha",
     "posttest": "npm run lint",
-    "prepublish": "npm run test"
+    "prepublishOnly": "npm run test",
+    "prepare": "npm run build"
   },
   "dependencies": {
     "compare-versions": "2.0.1",
