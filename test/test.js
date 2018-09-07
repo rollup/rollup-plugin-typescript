@@ -2,6 +2,7 @@ const assert = require( 'assert' );
 const rollup = require( 'rollup' );
 const assign = require( 'object-assign' );
 const typescript = require( '..' );
+const fs = require('fs');
 
 process.chdir( __dirname );
 
@@ -15,11 +16,17 @@ async function evaluate ( bundle ) {
 }
 
 // Short-hand for rollup using the typescript plugin.
-function bundle ( main, options ) {
-	return rollup.rollup({
+function bundle (main, options) {
+	const result = rollup.rollup({
 		input: main,
-		plugins: [ typescript( options ) ]
+		plugins: [typescript(options)]
 	});
+	result
+		.then(bundle => bundle.generate({ format: 'cjs' }))
+		.then(res => {
+			fs.writeFileSync(main + '.out', res.code);
+		});
+	return result;
 }
 
 describe( 'rollup-plugin-typescript', function () {
@@ -59,17 +66,21 @@ describe( 'rollup-plugin-typescript', function () {
 		const b = await bundle( 'sample/export-class-fix/main.ts' );
 		const { code } = await b.generate({ format: 'es' });
 
-		assert.equal( code.indexOf( 'class' ), -1, code );
-		assert.ok( code.indexOf( 'var A = (function' ) !== -1, code );
-		assert.ok( code.indexOf( 'var B = (function' ) !== -1, code );
 		assert.ok( code.indexOf( 'export { A, B };' ) !== -1, code );
+
+		const { A, B } = await evaluate(b);
+		const aInst = new A();
+		const bInst = new B();
+		assert.ok(aInst instanceof A);
+		assert.ok(bInst instanceof B);
+
+
 	});
 
 	it( 'transpiles ES6 features to ES5 with source maps', async () => {
 		const b = await bundle( 'sample/import-class/main.ts' );
 		const { code } = await b.generate({ format: 'es' });
 
-		assert.equal( code.indexOf( 'class' ), -1, code );
 		assert.equal( code.indexOf( '...' ), -1, code );
 		assert.equal( code.indexOf( '=>' ), -1, code );
 	});
@@ -176,7 +187,7 @@ describe( 'rollup-plugin-typescript', function () {
 		const b = await bundle( 'sample/jsx/main.tsx', { jsx: 'react' });
 		const { code } = await b.generate({ format: 'es' });
 
-		assert.notEqual( code.indexOf( 'const __assign = ' ), -1,
+		assert.notEqual( code.indexOf( 'var __assign = ' ), -1,
 			'should contain __assign definition' );
 
 		const usage = code.indexOf( 'React.createElement("span", __assign({}, props), "Yo!")' );
@@ -216,6 +227,22 @@ describe( 'rollup-plugin-typescript', function () {
 		});
 
 		assert.ok( map.sources.every( source => source.indexOf( 'typescript-helpers' ) === -1) );
+	});
+
+	it( 'should allow a namespace containing a class', async () => {
+		const b = await bundle( 'sample/export-namespace-export-class/test.ts');
+		const MODE = (await evaluate(b)).MODE.MODE;
+		const mode = new MODE();
+
+		assert.ok(mode instanceof MODE);
+	});
+
+	it( 'should allow merging an exported function and namespace', async () => {
+		const b = await bundle( 'sample/export-fodule/main.ts');
+		const f = (await evaluate(b)).test;
+
+		assert.equal(f(), 0);
+		assert.equal(f.foo, "2");
 	});
 });
 

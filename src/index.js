@@ -7,7 +7,6 @@ import compareVersions from 'compare-versions';
 
 import { endsWith } from './string';
 import { getDefaultOptions, compilerOptionsFromTsConfig, adjustCompilerOptions } from './options.js';
-import fixExportClass from './fixExportClass';
 import resolveHost from './resolveHost';
 
 /*
@@ -21,8 +20,8 @@ interface Options {
 */
 
 // The injected id for helpers. Intentially invalid to prevent helpers being included in source maps.
-const helpersId = '\0typescript-helpers';
-const helpersSource = fs.readFileSync( path.resolve( __dirname, '../src/typescript-helpers.js' ), 'utf-8' );
+const helpersId = 'tslib';
+const helpersSource = fs.readFileSync( path.resolve( __dirname, '../node_modules/tslib/tslib.es6.js' ), 'utf-8' );
 
 export default function typescript ( options ) {
 	options = assign( {}, options || {} );
@@ -108,7 +107,7 @@ export default function typescript ( options ) {
 		transform ( code, id ) {
 			if ( !filter( id ) ) return null;
 
-			const transformed = typescript.transpileModule( fixExportClass( code, id ), {
+			const transformed = typescript.transpileModule( code, {
 				fileName: id,
 				reportDiagnostics: true,
 				compilerOptions
@@ -141,9 +140,7 @@ export default function typescript ( options ) {
 			}
 
 			return {
-				// Always append an import for the helpers.
-				code: transformed.outputText +
-					`\nimport { __assign, __awaiter, __extends, __decorate, __metadata, __param } from '${helpersId}';`,
+				code: transformed.outputText,
 
 				// Rollup expects `map` to be an object so we must parse the string
 				map: transformed.sourceMapText ? JSON.parse(transformed.sourceMapText) : null
