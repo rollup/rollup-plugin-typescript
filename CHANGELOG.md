@@ -3,6 +3,7 @@
 ## 1.0.0
 *unreleased*
 * Require TypeScript as peer dependency ([#121](https://github.com/rollup/rollup-plugin-typescript/issues/121))
+* Also test on Node 10 ([#119](https://github.com/rollup/rollup-plugin-typescript/issues/119))
 
 ## 0.8.1
 
