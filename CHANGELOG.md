@@ -1,5 +1,9 @@
 # rollup-plugin-typescript changelog
 
+## 1.0.0
+*unreleased*
+* Require TypeScript as peer dependency ([#121](https://github.com/rollup/rollup-plugin-typescript/issues/121))
+
 ## 0.8.1
 
 * Ignore typescript-helpers in source maps ([#61](https://github.com/rollup/rollup-plugin-typescript/issues/61))
