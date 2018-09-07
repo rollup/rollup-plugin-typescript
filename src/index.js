@@ -1,9 +1,9 @@
 import * as ts from 'typescript';
 import { createFilter } from 'rollup-pluginutils';
-import * as path from 'path';
 import * as fs from 'fs';
 import assign from 'object-assign';
 import compareVersions from 'compare-versions';
+import resolveId from 'resolve';
 
 import { endsWith } from './string';
 import { getDefaultOptions, compilerOptionsFromTsConfig, adjustCompilerOptions } from './options.js';
@@ -19,9 +19,8 @@ interface Options {
 }
 */
 
-// The injected id for helpers. Intentially invalid to prevent helpers being included in source maps.
-const helpersId = 'tslib';
-const helpersSource = fs.readFileSync( path.resolve( __dirname, '../node_modules/tslib/tslib.es6.js' ), 'utf-8' );
+const helpersId = '\0tslib';
+const helpersSource = fs.readFileSync(resolveId.sync('tslib/tslib.es6.js', { basedir: __dirname }), 'utf-8' );
 
 export default function typescript ( options ) {
 	options = assign( {}, options || {} );

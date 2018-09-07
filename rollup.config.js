@@ -9,6 +9,7 @@ export default {
 		'path',
 		'fs',
 		'object-assign',
+		'resolve',
 		'rollup-pluginutils',
 		'tippex',
 		'typescript'
