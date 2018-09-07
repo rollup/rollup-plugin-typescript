@@ -22,7 +22,7 @@ npm install --save-dev rollup-plugin-typescript
 import typescript from 'rollup-plugin-typescript';
 
 export default {
-  entry: './main.ts',
+  input: './main.ts',
 
   plugins: [
     typescript()
