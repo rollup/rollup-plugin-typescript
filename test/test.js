@@ -6,9 +6,7 @@ const typescript = require( '..' );
 // Evaluate a bundle (as CommonJS) and return its exports.
 async function evaluate ( bundle ) {
 	const module = { exports: {} };
-
 	new Function( 'module', 'exports', (await bundle.generate({ format: 'cjs' })).code )( module, module.exports );
-
 	return module.exports;
 }
 
