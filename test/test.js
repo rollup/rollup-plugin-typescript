@@ -32,7 +32,7 @@ async function evaluateBundle ( bundle ) {
 }
 
 async function evaluate ( main, options ) {
-	return await evaluateBundle(await bundle(main, options));
+	return evaluateBundle(await bundle(main, options));
 }
 
 describe( 'rollup-plugin-typescript', () => {
@@ -47,6 +47,23 @@ describe( 'rollup-plugin-typescript', () => {
 
 	it( 'ignores the declaration option', () => {
 		return bundle( 'sample/basic/main.ts', { declaration: true });
+	});
+
+	it( 'throws for unsupported module types', async () => {
+		let caughtError = null;
+		try {
+			await bundle( 'sample/basic/main.ts', { module: 'ES5' } );
+		} catch (error) {
+			caughtError = error;
+		}
+
+		assert.ok(!!caughtError, 'Throws an error.');
+		assert.ok(caughtError.message.indexOf( 'The module kind should be \'ES2015\' or \'ESNext, found: \'ES5\'' ) !== -1,
+			`Unexpected error message: ${caughtError.message}`);
+	});
+
+	it( 'ignores case of module types', async () => {
+		return bundle( 'sample/basic/main.ts', { module: 'eSnExT' } );
 	});
 
 	it( 'handles async functions', async () => {
@@ -87,15 +104,16 @@ describe( 'rollup-plugin-typescript', () => {
 	});
 
 	it( 'reports diagnostics and throws if errors occur during transpilation', async () => {
-		let errored;
+		let caughtError = null;
 		try {
 			await bundle( 'sample/syntax-error/missing-type.ts' );
-		} catch (err) {
-			errored = true;
-			assert.ok( err.message.indexOf( 'There were TypeScript errors transpiling' ) !== -1, 'Should reject erroneous code.' );
+		} catch (error) {
+			caughtError = error;
 		}
 
-		assert.ok(errored);
+		assert.ok(!!caughtError, 'throws an error');
+		assert.ok( caughtError.message.indexOf( 'There were TypeScript errors transpiling' ) !== -1,
+			`Unexpected error message: ${caughtError.message}`);
 	});
 
 	it( 'works with named exports for abstract classes', async () => {
