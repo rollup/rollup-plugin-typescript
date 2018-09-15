@@ -42,7 +42,7 @@ export default function typescript ( options = {} ) {
 
 	// Verify that we're targeting ES2015 modules.
 	const moduleType = options.module.toUpperCase();
-	if ( moduleType !== 'ES2015' && moduleType !== 'ES6' && moduleType !== 'ESNEXT' ) {
+	if ( moduleType !== 'ES2015' && moduleType !== 'ES6' && moduleType !== 'ESNEXT' && moduleType !== 'COMMONJS' ) {
 		throw new Error( `rollup-plugin-typescript: The module kind should be 'ES2015' or 'ESNext, found: '${ options.module }'` );
 	}
 
@@ -57,6 +57,8 @@ export default function typescript ( options = {} ) {
 	const compilerOptions = parsed.options;
 
 	return {
+		name: 'typescript',
+
 		resolveId ( importee, importer ) {
 			if ( importee === 'tslib' ) {
 				return TSLIB_ID;

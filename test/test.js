@@ -3,11 +3,11 @@ const rollup = require( 'rollup' );
 const assign = require( 'object-assign' );
 const typescript = require( '..' );
 const path = require('path');
+const commonjs = require('rollup-plugin-commonjs');
 
 async function bundle (main, options) {
 	return rollup.rollup({
 		input: main,
-		inlineDynamicImports: true,
 		plugins: [typescript(options)]
 	});
 }
@@ -251,8 +251,20 @@ describe( 'rollup-plugin-typescript', () => {
 	});
 
 	it('supports dynamic imports', async () => {
-		const code = await getCode('sample/dynamic-imports/main.ts');
+		const code = await getCodeFromBundle(await rollup.rollup({
+			input: 'sample/dynamic-imports/main.ts',
+			inlineDynamicImports: true,
+			plugins: [typescript()]
+		}));
 		assert.notEqual( code.indexOf( 'console.log(\'dynamic\')' ), -1 );
+	});
+
+	it('supports CommonJS imports when the output format is CommonJS', async () => {
+		const output = await evaluateBundle(await rollup.rollup({
+			input: 'sample/commonjs-imports/main.ts',
+			plugins: [typescript({module: 'CommonJS'}), commonjs({extensions: ['.ts', '.js']})]
+		}));
+		assert.equal(output, 'exported from commonjs');
 	});
 });
 
