@@ -2,9 +2,6 @@ const assert = require( 'assert' );
 const rollup = require( 'rollup' );
 const assign = require( 'object-assign' );
 const typescript = require( '..' );
-const fs = require('fs');
-
-process.chdir( __dirname );
 
 // Evaluate a bundle (as CommonJS) and return its exports.
 async function evaluate ( bundle ) {
@@ -17,16 +14,14 @@ async function evaluate ( bundle ) {
 
 // Short-hand for rollup using the typescript plugin.
 async function bundle (main, options) {
-	const bundle = await rollup.rollup({
+	return await rollup.rollup({
 		input: main,
 		plugins: [typescript(options)]
 	});
-	fs.writeFileSync(main + '.out', (await bundle.generate({ format: 'cjs' })).code);
-	return bundle;
 }
 
-describe( 'rollup-plugin-typescript', function () {
-	this.timeout( 5000 );
+describe( 'rollup-plugin-typescript', () => {
+	beforeEach(() => process.chdir(__dirname));
 
 	it( 'runs code through typescript', async () => {
 		const b = await bundle( 'sample/basic/main.ts' );
@@ -127,53 +122,6 @@ describe( 'rollup-plugin-typescript', function () {
 		assert.equal( await evaluate( b ), 1337 );
 	});
 
-	describe( 'strictNullChecks', () => {
-		it( 'is enabled for versions >= 1.9.0', async () => {
-			await bundle( 'sample/overriding-typescript/main.ts', {
-				tsconfig: false,
-				strictNullChecks: true,
-
-				typescript: fakeTypescript({
-					version: '1.9.0-fake',
-					transpileModule ( code, options ) {
-						assert.ok( options.compilerOptions.strictNullChecks,
-							'strictNullChecks should be passed through' );
-
-						return {
-							outputText: '',
-							diagnostics: [],
-							sourceMapText: JSON.stringify({ mappings: '' })
-						};
-					}
-				})
-			});
-		});
-
-		it( 'is disabled with a warning < 1.9.0', async () => {
-			let warning = '';
-
-			console.warn = function (msg) {
-				warning = msg;
-			};
-
-			await rollup.rollup({
-				input: 'sample/overriding-typescript/main.ts',
-				plugins: [
-					typescript({
-						tsconfig: false,
-						strictNullChecks: true,
-
-						typescript: fakeTypescript({
-							version: '1.8.0-fake'
-						})
-					})
-				]
-			});
-
-			assert.notEqual( warning.indexOf( "'strictNullChecks' is not supported" ), -1 );
-		});
-	});
-
 	it( 'should not resolve .d.ts files', async () => {
 		const b = await bundle( 'sample/dts/main.ts' );
 		assert.deepEqual( b.imports, [ 'an-import' ] );
@@ -188,6 +136,15 @@ describe( 'rollup-plugin-typescript', function () {
 
 		const usage = code.indexOf( 'React.createElement("span", __assign({}, props), "Yo!")' );
 
+		assert.notEqual( usage, -1, 'should contain usage' );
+	});
+
+	it( 'automatically loads tsconfig.json from the current directory', async () => {
+		process.chdir('sample/tsconfig-jsx');
+		const b = await bundle( 'main.tsx');
+		const { code } = await b.generate({ format: 'es' });
+
+		const usage = code.indexOf( 'React.createElement("span", __assign({}, props), "Yo!")' );
 		assert.notEqual( usage, -1, 'should contain usage' );
 	});
 
@@ -257,6 +214,7 @@ function fakeTypescript ( custom ) {
 				'include',
 				'exclude',
 				'typescript',
+				'tslib',
 				'tsconfig'
 			].forEach( option => {
 				if ( option in options ) {

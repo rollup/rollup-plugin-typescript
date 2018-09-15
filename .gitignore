@@ -1,3 +1,4 @@
 /node_modules
+!test/sample/dts/node_modules
 dist
 test/**/*.out

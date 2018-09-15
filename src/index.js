@@ -3,14 +3,13 @@ import { createFilter } from 'rollup-pluginutils';
 import * as fs from 'fs';
 import resolveId from 'resolve';
 import { endsWith } from './string';
-import { getDefaultOptions, compilerOptionsFromTsConfig, adjustCompilerOptions } from './options.js';
+import { getDefaultOptions, getCompilerOptionsFromTsConfig, adjustCompilerOptions } from './options.js';
 import resolveHost from './resolveHost';
 
-const helpersId = 'tslib';
-const helpersSource = fs.readFileSync(resolveId.sync('tslib/tslib.es6.js', { basedir: __dirname }), 'utf-8' );
+const tslibId = 'tslib';
 
-export default function typescript ( options ) {
-	options = Object.assign( {}, options || {} );
+export default function typescript ( options = {} ) {
+	options = Object.assign( {}, options );
 
 	const filter = createFilter(
 		options.include || [ '*.ts+(|x)', '**/*.ts+(|x)' ],
@@ -19,14 +18,17 @@ export default function typescript ( options ) {
 	delete options.include;
 	delete options.exclude;
 
-	// Allow users to override the TypeScript version used for transpilation.
+	// Allow users to override the TypeScript version used for transpilation and tslib version used for helpers.
 	const typescript = options.typescript || ts;
+	const tslib = options.tslib ||
+		fs.readFileSync(resolveId.sync('tslib/tslib.es6.js', { basedir: __dirname }), 'utf-8' );
 
 	delete options.typescript;
+	delete options.tslib;
 
 	// Load options from `tsconfig.json` unless explicitly asked not to.
 	const tsconfig = options.tsconfig === false ? {} :
-		compilerOptionsFromTsConfig( typescript );
+		getCompilerOptionsFromTsConfig( typescript );
 
 	delete options.tsconfig;
 
@@ -35,7 +37,6 @@ export default function typescript ( options ) {
 	adjustCompilerOptions( typescript, tsconfig );
 	adjustCompilerOptions( typescript, options );
 
-	// Merge all options.
 	options = Object.assign( tsconfig, getDefaultOptions(), options );
 
 	// Verify that we're targeting ES2015 modules.
@@ -56,8 +57,8 @@ export default function typescript ( options ) {
 	return {
 		resolveId ( importee, importer ) {
 			// Handle the special `typescript-helpers` import itself.
-			if ( importee === helpersId ) {
-				return helpersId;
+			if ( importee === tslibId ) {
+				return tslibId;
 			}
 
 			if ( !importer ) return null;
@@ -77,8 +78,8 @@ export default function typescript ( options ) {
 		},
 
 		load ( id ) {
-			if ( id === helpersId ) {
-				return helpersSource;
+			if ( id === tslibId ) {
+				return tslib;
 			}
 		},
 
