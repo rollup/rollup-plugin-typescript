@@ -37,8 +37,11 @@ function findFile ( cwd, filename ) {
 	return null;
 }
 
-export function getCompilerOptionsFromTsConfig (typescript ) {
-	const existingTsConfig = findFile( process.cwd(), 'tsconfig.json' );
+export function getCompilerOptionsFromTsConfig (typescript, tsconfigPath) {
+	if (tsconfigPath && !existsSync(tsconfigPath)) {
+		throw new Error(`Could not find specified tsconfig.json at ${tsconfigPath}`);
+	}
+	const existingTsConfig = tsconfigPath || findFile( process.cwd(), 'tsconfig.json' );
 	if (!existingTsConfig) {
 		return {};
 	}

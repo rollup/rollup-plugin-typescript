@@ -47,7 +47,7 @@ The following options are unique to `rollup-plugin-typescript`:
 
 * `options.include` and `options.exclude` (each a minimatch pattern, or array of minimatch patterns), which determine which files are transpiled by Typescript (all `.ts` and `.tsx` files by default).
 
-* `tsconfig` when set to false, ignores any options specified in the config file
+* `tsconfig` when set to false, ignores any options specified in the config file. If set to a string that corresponds to a file path, the specified file will be used as config file.
 
 * `typescript` overrides TypeScript used for transpilation:
   ```js

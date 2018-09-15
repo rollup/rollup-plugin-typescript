@@ -2,6 +2,7 @@ const assert = require( 'assert' );
 const rollup = require( 'rollup' );
 const assign = require( 'object-assign' );
 const typescript = require( '..' );
+const path = require('path');
 
 async function bundle (main, options) {
 	return rollup.rollup({
@@ -178,6 +179,27 @@ describe( 'rollup-plugin-typescript', () => {
 
 		const usage = code.indexOf( 'React.createElement("span", __assign({}, props), "Yo!")' );
 		assert.notEqual( usage, -1, 'should contain usage' );
+	});
+
+	it( 'allows specifying a path for tsconfig.json', async () => {
+		const code = await getCode( 'sample/tsconfig-jsx/main.tsx',
+			{tsconfig: path.resolve(__dirname, 'sample/tsconfig-jsx/tsconfig.json')});
+
+		const usage = code.indexOf( 'React.createElement("span", __assign({}, props), "Yo!")' );
+		assert.notEqual( usage, -1, 'should contain usage' );
+	});
+
+	it( 'throws if tsconfig cannot be found', async () => {
+		let caughtError = null;
+		try {
+			await bundle( 'sample/tsconfig-jsx/main.tsx', {tsconfig: path.resolve(__dirname, 'does-not-exist.json')} );
+		} catch (error) {
+			caughtError = error;
+		}
+
+		assert.ok(!!caughtError, 'Throws an error.');
+		assert.ok(caughtError.message.indexOf( 'Could not find specified tsconfig.json' ) !== -1,
+			`Unexpected error message: ${caughtError.message}`);
 	});
 
 	it('should throw on bad options', () => {
