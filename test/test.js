@@ -6,6 +6,7 @@ const typescript = require( '..' );
 async function bundle (main, options) {
 	return rollup.rollup({
 		input: main,
+		inlineDynamicImports: true,
 		plugins: [typescript(options)]
 	});
 }
@@ -192,7 +193,7 @@ describe( 'rollup-plugin-typescript', () => {
 			sourcemap: true
 		})).map;
 
-		assert.ok( map.sources.every( source => source.indexOf( 'typescript-helpers' ) === -1) );
+		assert.ok( map.sources.every( source => source.indexOf( 'tslib' ) === -1) );
 	});
 
 	it( 'should allow a namespace containing a class', async () => {
@@ -207,6 +208,11 @@ describe( 'rollup-plugin-typescript', () => {
 
 		assert.equal(f(), 0);
 		assert.equal(f.foo, "2");
+	});
+
+	it('supports dynamic imports', async () => {
+		const code = await getCode('sample/dynamic-imports/main.ts');
+		assert.notEqual( code.indexOf( 'console.log(\'dynamic\')' ), -1 );
 	});
 });
 

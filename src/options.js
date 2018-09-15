@@ -7,7 +7,7 @@ import {
 export function getDefaultOptions () {
 	return {
 		noEmitHelpers: true,
-		module: 'es2015',
+		module: 'ESNext',
 		sourceMap: true,
 		importHelpers: true
 	};

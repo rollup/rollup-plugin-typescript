@@ -6,7 +6,7 @@ import { endsWith } from './string';
 import { getDefaultOptions, getCompilerOptionsFromTsConfig, adjustCompilerOptions } from './options.js';
 import resolveHost from './resolveHost';
 
-const tslibId = 'tslib';
+const TSLIB_ID = '\0tslib';
 
 export default function typescript ( options = {} ) {
 	options = Object.assign( {}, options );
@@ -57,9 +57,8 @@ export default function typescript ( options = {} ) {
 
 	return {
 		resolveId ( importee, importer ) {
-			// Handle the special `typescript-helpers` import itself.
-			if ( importee === tslibId ) {
-				return tslibId;
+			if ( importee === 'tslib' ) {
+				return TSLIB_ID;
 			}
 
 			if ( !importer ) return null;
@@ -79,7 +78,7 @@ export default function typescript ( options = {} ) {
 		},
 
 		load ( id ) {
-			if ( id === tslibId ) {
+			if ( id === TSLIB_ID ) {
 				return tslib;
 			}
 		},
