@@ -12,8 +12,10 @@ See [rollup-plugin-babel](https://github.com/rollup/rollup-plugin-babel).
 ## Installation
 
 ```bash
-npm install --save-dev rollup-plugin-typescript
+npm install --save-dev rollup-plugin-typescript typescript tslib
 ```
+
+Note that both `typescript` and `tslib` are peer dependencies of this plugin that need to be installed separately.
 
 ## Usage
 
@@ -38,16 +40,24 @@ The following options are unique to `rollup-plugin-typescript`:
 
 * `tsconfig` when set to false, ignores any options specified in the config file
 
-* `typescript` overrides TypeScript used for transpilation
+* `typescript` overrides TypeScript used for transpilation:
+  ```js
+  typescript({
+    typescript: require('some-fork-of-typescript')
+  })
+  ```
+
+* `tslib` overrides the injected TypeScript helpers with a custom version
+  ```js
+  typescript({
+    tslib: require('some-fork-of-tslib')
+  })
+  ```
 
 ### TypeScript version
-[TypeScript 2.6.2](https://github.com/Microsoft/TypeScript/wiki/Roadmap#26-october-2017) is used by default. Should your project require it, you can override the TypeScript version used for _transpiling the sources_.
-
-```js
-typescript({
-  typescript: require('some-fork-of-typescript')
-})
-```
+Due to the use of `tslib` to inject helpers, this plugin requires at least [TypeScript 2.1](https://github.com/Microsoft/TypeScript/wiki/Roadmap#21-december-2016). See also [here](https://blog.mariusschulz.com/2016/12/16/typescript-2-1-external-helpers-library#the-importhelpers-flag-and-tslib).
 
 ## Issues
-Emit-less types, see [#28](https://github.com/rollup/rollup-plugin-typescript/issues/28).
+This plugin will currently **not warn for any type violations**. This plugin relies on TypeScript's [transpileModule](https://github.com/Microsoft/TypeScript/wiki/Using-the-Compiler-API#a-simple-transform-function) function which basically transpiles TypeScript to JavaScript by stripping any type information on a per-file basis. While this is faster than using the language service, no cross-file type checks are possible with this approach.
+
+This also causes issues with emit-less types, see [#28](https://github.com/rollup/rollup-plugin-typescript/issues/28).

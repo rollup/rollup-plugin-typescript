@@ -40,8 +40,9 @@ export default function typescript ( options = {} ) {
 	options = Object.assign( tsconfig, getDefaultOptions(), options );
 
 	// Verify that we're targeting ES2015 modules.
-	if ( options.module !== 'es2015' && options.module !== 'es6' ) {
-		throw new Error( `rollup-plugin-typescript: The module kind should be 'es2015', found: '${ options.module }'` );
+	const moduleType = options.module.toUpperCase();
+	if ( moduleType !== 'ES2015' && moduleType !== 'ES6' && moduleType !== 'ESNEXT' ) {
+		throw new Error( `rollup-plugin-typescript: The module kind should be 'ES2015' or 'ESNext, found: '${ options.module }'` );
 	}
 
 	const parsed = typescript.convertCompilerOptionsFromJson( options, process.cwd() );
