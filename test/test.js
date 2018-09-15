@@ -10,8 +10,10 @@ async function bundle (main, options) {
 	});
 }
 
+const getOutputFromGenerated = generated => generated.output ? generated.output[0] : generated;
+
 async function getCodeFromBundle (bundle) {
-	return (await bundle.generate({ format: 'esm' })).code;
+	return getOutputFromGenerated(await bundle.generate({ format: 'esm' })).code;
 }
 
 async function getCode ( main, options ) {
@@ -20,7 +22,11 @@ async function getCode ( main, options ) {
 
 async function evaluateBundle ( bundle ) {
 	const module = { exports: {} };
-	new Function( 'module', 'exports', (await bundle.generate({ format: 'cjs' })).code )( module, module.exports );
+	new Function(
+		'module',
+		'exports',
+		getOutputFromGenerated(await bundle.generate({ format: 'cjs' })).code
+	)( module, module.exports );
 	return module.exports;
 }
 
@@ -132,7 +138,7 @@ describe( 'rollup-plugin-typescript', () => {
 	});
 
 	it( 'should not resolve .d.ts files', async () => {
-		const {imports} = await bundle( 'sample/dts/main.ts' );
+		const imports = (await bundle( 'sample/dts/main.ts' )).cache.modules[0].dependencies;
 		assert.deepEqual( imports, [ 'an-import' ] );
 	});
 
@@ -181,10 +187,10 @@ describe( 'rollup-plugin-typescript', () => {
 			sourceMap: true
 		});
 
-		const { map } = await bundled.generate({
+		const map = getOutputFromGenerated(await bundled.generate({
 			format: 'es',
 			sourcemap: true
-		});
+		})).map;
 
 		assert.ok( map.sources.every( source => source.indexOf( 'typescript-helpers' ) === -1) );
 	});
