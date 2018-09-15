@@ -25,14 +25,23 @@ import typescript from 'rollup-plugin-typescript';
 
 export default {
   input: './main.ts',
-
   plugins: [
     typescript()
   ]
 }
 ```
 
-The plugin loads any [`compilerOptions`](http://www.typescriptlang.org/docs/handbook/compiler-options.html) from the `tsconfig.json` file by default. Passing options to the plugin directly overrides those options.
+The plugin loads any [`compilerOptions`](http://www.typescriptlang.org/docs/handbook/compiler-options.html) from the `tsconfig.json` file by default. Passing options to the plugin directly overrides those options:
+
+```js
+...
+export default {
+  input: './main.ts',
+  plugins: [
+      typescript({lib: ["es5", "es6", "dom"], target: "es5"})
+  ]
+}
+```
 
 The following options are unique to `rollup-plugin-typescript`:
 
