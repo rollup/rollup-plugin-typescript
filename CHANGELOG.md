@@ -1,7 +1,8 @@
 # rollup-plugin-typescript changelog
 
 ## 1.0.0
-*unreleased*
+*2018-09-16*
+* Major update for TypeScript 2/3, Rollup 1 compatibility, lots of fixes ([#124](https://github.com/rollup/rollup-plugin-typescript/issues/124))
 * Require TypeScript as peer dependency ([#121](https://github.com/rollup/rollup-plugin-typescript/issues/121))
 * Also test on Node 10 ([#119](https://github.com/rollup/rollup-plugin-typescript/issues/119))
 * Fix example in readme ([#98](https://github.com/rollup/rollup-plugin-typescript/issues/98))
