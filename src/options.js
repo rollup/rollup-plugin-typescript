@@ -1,5 +1,4 @@
 import * as path from 'path';
-import compareVersions from 'compare-versions';
 import {
 	existsSync,
 	readFileSync
@@ -8,7 +7,7 @@ import {
 export function getDefaultOptions () {
 	return {
 		noEmitHelpers: true,
-		module: 'es2015',
+		module: 'ESNext',
 		sourceMap: true,
 		importHelpers: true
 	};
@@ -38,13 +37,17 @@ function findFile ( cwd, filename ) {
 	return null;
 }
 
-export function compilerOptionsFromTsConfig ( typescript ) {
-	const cwd = process.cwd();
-
-	const tsconfig = typescript.readConfigFile( findFile( cwd, 'tsconfig.json' ), path => readFileSync( path, 'utf8' ) );
+export function getCompilerOptionsFromTsConfig (typescript, tsconfigPath) {
+	if (tsconfigPath && !existsSync(tsconfigPath)) {
+		throw new Error(`Could not find specified tsconfig.json at ${tsconfigPath}`);
+	}
+	const existingTsConfig = tsconfigPath || findFile( process.cwd(), 'tsconfig.json' );
+	if (!existingTsConfig) {
+		return {};
+	}
+	const tsconfig = typescript.readConfigFile( existingTsConfig, path => readFileSync( path, 'utf8' ) );
 
 	if ( !tsconfig.config || !tsconfig.config.compilerOptions ) return {};
-
 	return tsconfig.config.compilerOptions;
 }
 
@@ -59,11 +62,4 @@ export function adjustCompilerOptions ( typescript, options ) {
 	// Delete the `declaration` option to prevent compilation error.
 	// See: https://github.com/rollup/rollup-plugin-typescript/issues/45
 	delete options.declaration;
-
-	const tsVersion = typescript.version.split('-')[0];
-	if ( 'strictNullChecks' in options && compareVersions( tsVersion, '1.9.0' ) < 0 ) {
-		delete options.strictNullChecks;
-
-		console.warn( `rollup-plugin-typescript: 'strictNullChecks' is not supported; disabling it` );
-	}
 }

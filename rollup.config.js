@@ -5,13 +5,10 @@ export default {
 	input: 'src/index.js',
 
 	external: [
-		'compare-versions',
 		'path',
 		'fs',
-		'object-assign',
 		'resolve',
 		'rollup-pluginutils',
-		'tippex',
 		'typescript'
 	],
 
