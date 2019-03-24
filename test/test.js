@@ -1,6 +1,5 @@
 const assert = require( 'assert' );
 const rollup = require( 'rollup' );
-const assign = require( 'object-assign' );
 const typescript = require( '..' );
 const path = require('path');
 const commonjs = require('rollup-plugin-commonjs');
@@ -12,7 +11,7 @@ async function bundle (main, options) {
 	});
 }
 
-const getOutputFromGenerated = generated => generated.output ? generated.output[0] : generated;
+const getOutputFromGenerated = generated => generated.output[0];
 
 async function getCodeFromBundle (bundle) {
 	return getOutputFromGenerated(await bundle.generate({ format: 'esm' })).code;
@@ -269,7 +268,7 @@ describe( 'rollup-plugin-typescript', () => {
 });
 
 function fakeTypescript ( custom ) {
-	return assign({
+	return Object.assign({
 		transpileModule () {
 			return {
 				outputText: '',
