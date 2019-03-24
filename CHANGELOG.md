@@ -1,5 +1,9 @@
 # rollup-plugin-typescript changelog
 
+## 1.0.1
+*2019-03-24*
+* Update dependencies ([#136](https://github.com/rollup/rollup-plugin-typescript/issues/136))
+
 ## 1.0.0
 *2018-09-16*
 * Major update for TypeScript 2/3, Rollup 1 compatibility, lots of fixes ([#124](https://github.com/rollup/rollup-plugin-typescript/issues/124))
