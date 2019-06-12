@@ -38,7 +38,7 @@
   "devDependencies": {
     "buble": "^0.19.7",
     "eslint": "^5.15.3",
-    "mocha": "^6.0.2",
+    "mocha": "^6.1.4",
     "rimraf": "^2.6.3",
     "rollup": "^1.7.0",
     "rollup-plugin-buble": "^0.19.6",
