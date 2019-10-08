@@ -62,9 +62,7 @@ export function adjustCompilerOptions ( typescript, options ) {
 	// Delete the `declaration` option to prevent compilation error.
 	// See: https://github.com/rollup/rollup-plugin-typescript/issues/45
 	delete options.declaration;
-	// Delete the `declarationMap` option, as it will cause an error, unless
-	// composite is defined instead.
-	if(!options.composite) {
-		delete options.declarationMap;
-	}
+	// Delete the `declarationMap` option, as it will cause an error, because we have
+	// deleted the `declaration` option.
+	delete options.declarationMap;
 }
