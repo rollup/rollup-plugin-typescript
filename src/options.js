@@ -63,6 +63,9 @@ export function adjustCompilerOptions ( typescript, options ) {
 	// See: https://github.com/rollup/rollup-plugin-typescript/issues/45
 	// See: https://github.com/rollup/rollup-plugin-typescript/issues/142
 	delete options.declaration;
+	// Delete the `declarationMap` option, as it will cause an error, because we have
+	// deleted the `declaration` option.
+	delete options.declarationMap;
 	delete options.incremental;
 	delete options.tsBuildInfoFile;
 }
