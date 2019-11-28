@@ -89,3 +89,18 @@ Note that this will often result in less optimal output.
 This plugin will currently **not warn for any type violations**. This plugin relies on TypeScript's [transpileModule](https://github.com/Microsoft/TypeScript/wiki/Using-the-Compiler-API#a-simple-transform-function) function which basically transpiles TypeScript to JavaScript by stripping any type information on a per-file basis. While this is faster than using the language service, no cross-file type checks are possible with this approach.
 
 This also causes issues with emit-less types, see [#28](https://github.com/rollup/rollup-plugin-typescript/issues/28).
+
+### The `extends` Property
+
+The `extends` property is not supported. This plugin will only use the `configOptions` present in the config file.
+```jsonc
+// tsconfig.json
+{
+  // `configOptions` from `base` will not be imported.
+  "extends": "./configs/base",
+  // Only these options will be used.
+  "configOptions": {
+    target: "es6"
+  }
+}
+```
