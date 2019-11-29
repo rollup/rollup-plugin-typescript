@@ -1,3 +1,7 @@
+# Moving
+
+We're moving this plugin to a new home. Please stand by...
+
 # rollup-plugin-typescript
 [![Build Status](https://travis-ci.org/rollup/rollup-plugin-typescript.svg?branch=master)](https://travis-ci.org/rollup/rollup-plugin-typescript)
 ![npm-version](https://img.shields.io/npm/v/rollup-plugin-typescript.svg?maxAge=2592000)
