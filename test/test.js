@@ -180,6 +180,14 @@ describe( 'rollup-plugin-typescript', () => {
 		assert.notEqual( usage, -1, 'should contain usage' );
 	});
 
+	it( 'should support extends property in tsconfig', async () => {
+		process.chdir('sample/tsconfig-extends');
+		const code = await getCode( 'main.tsx');
+
+		const usage = code.indexOf( 'React.createElement("span", __assign({}, props), "Yo!")' );
+		assert.notEqual( usage, -1, 'should contain usage' );
+	});
+
 	it( 'allows specifying a path for tsconfig.json', async () => {
 		const code = await getCode( 'sample/tsconfig-jsx/main.tsx',
 			{tsconfig: path.resolve(__dirname, 'sample/tsconfig-jsx/tsconfig.json')});
