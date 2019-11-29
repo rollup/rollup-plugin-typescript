@@ -3,7 +3,7 @@ import { createFilter } from 'rollup-pluginutils';
 import * as fs from 'fs';
 import resolveId from 'resolve';
 import { endsWith } from './string';
-import { getDefaultOptions, getCompilerOptionsFromTsConfig, adjustCompilerOptions } from './options.js';
+import { getDefaultOptions, readTsConfig, adjustCompilerOptions } from './options.js';
 import resolveHost from './resolveHost';
 
 const TSLIB_ID = '\0tslib';
@@ -19,6 +19,7 @@ export default function typescript ( options = {} ) {
 	delete options.exclude;
 
 	// Allow users to override the TypeScript version used for transpilation and tslib version used for helpers.
+	/** @type {import('typescript')} */
 	const typescript = options.typescript || ts;
 	const tslib = options.tslib ||
 		fs.readFileSync(resolveId.sync('tslib/tslib.es6.js', { basedir: __dirname }), 'utf-8' );
@@ -27,18 +28,18 @@ export default function typescript ( options = {} ) {
 	delete options.tslib;
 
 	// Load options from `tsconfig.json` unless explicitly asked not to.
-	const tsconfig = options.tsconfig === false ?
-		{} :
-		getCompilerOptionsFromTsConfig( typescript, options.tsconfig );
+	const tsConfig = options.tsconfig === false ?
+		{ compilerOptions: {} } :
+		readTsConfig( typescript, options.tsconfig );
 
 	delete options.tsconfig;
 
 	// Since the CompilerOptions aren't designed for the Rollup
 	// use case, we'll adjust them for use with Rollup.
-	adjustCompilerOptions( typescript, tsconfig );
+	adjustCompilerOptions( typescript, tsConfig.compilerOptions );
 	adjustCompilerOptions( typescript, options );
 
-	options = Object.assign( tsconfig, getDefaultOptions(), options );
+	options = Object.assign( tsConfig.compilerOptions, getDefaultOptions(), options );
 
 	// Verify that we're targeting ES2015 modules.
 	const moduleType = options.module.toUpperCase();
@@ -54,7 +55,17 @@ export default function typescript ( options = {} ) {
 		throw new Error( `rollup-plugin-typescript: Couldn't process compiler options` );
 	}
 
-	const compilerOptions = parsed.options;
+	// let typescript load inheritance chain if there are base configs
+	const extendedConfig = !tsConfig.extends ?
+		null :
+		typescript.parseJsonConfigFileContent(tsConfig, typescript.sys, process.cwd(), parsed.options);
+	if (extendedConfig && extendedConfig.errors.length) {
+		extendedConfig.errors.forEach( error => console.error( `rollup-plugin-typescript: ${ error.messageText }` ) );
+
+		throw new Error( `rollup-plugin-typescript: Couldn't process compiler options` );
+	}
+
+	const compilerOptions = extendedConfig ? extendedConfig.options : parsed.options;
 
 	return {
 		name: 'typescript',
